@@ -39,7 +39,6 @@ class Level:
     def run(self):
         self.visible_sprites.update()
         self.visible_sprites.draw(relative_sprite=self.player)
-        self.debug.debug(self.player.status)
         self.ui.display()
 
     def setup_level(self):
