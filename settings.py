@@ -14,3 +14,20 @@ DAMAGE = 10
 LOWER_LAYER_COLOR = (58, 0, 59)
 HEALTH_COLOR = (255, 102, 0)
 ENERGY_COLOR = (0, 126, 255)
+
+magic_data = {
+    'flame': {
+        'type': 'flame',
+        'strength': 5, 
+        'cost': 20, 
+        'image': 'graphics/particles/flame/fire.png',
+        'frames': 'graphics/particles/flame/frames/'
+    },
+    'heal': {
+        'type': 'heal',
+        'strength': 20, 
+        'cost': 10, 
+        'image': 'graphics/particles/heal/heal.png',
+        'frames': 'graphics/particles/heal/frames/'
+    }
+}
