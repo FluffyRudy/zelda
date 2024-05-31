@@ -8,24 +8,45 @@ from pygame.math import Vector2
 from frameloader import load_frames
 from debug import Debug
 
-class Player(Sprite):
-    STATS = {'health': HEALTH_BAR_WIDTH, 'energy': ENERGY_BAR_WIDTH, 'attack': SPEED, 'magic': '4', 'speed': SPEED}
 
-    def __init__(self, pos: tuple[int, int], group: Union[Group, GroupSingle], obstacle: Group, weapon_creator, weapon_hider, magic_creator, magic_destroyer, magic_obstacle_handler):
+class Player(Sprite):
+    STATS = {
+        "health": HEALTH_BAR_WIDTH,
+        "energy": ENERGY_BAR_WIDTH,
+        "attack": SPEED,
+        "magic": "4",
+        "speed": SPEED,
+    }
+
+    def __init__(
+        self,
+        pos: tuple[int, int],
+        group: Union[Group, GroupSingle],
+        obstacle: Group,
+        weapon_creator,
+        weapon_hider,
+        magic_creator,
+        magic_destroyer,
+        magic_obstacle_handler,
+    ):
         super().__init__(group)
-        self.image: Surface = pygame.transform.scale(load('graphics/test/player.png').convert_alpha(), (TILESIZE, TILESIZE))
+        self.image: Surface = pygame.transform.scale(
+            load("graphics/test/player.png").convert_alpha(), (TILESIZE, TILESIZE)
+        )
         self.rect: Rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0, -20)
-        
+
         # Initializing player attributes
         self.direction: Vector2 = Vector2(0, 0)
-        self.speed = Player.STATS['speed']
-        self.health = Player.STATS['health'] * 0.5
-        self.energy = Player.STATS['energy']
+        self.speed = Player.STATS["speed"]
+        self.health = Player.STATS["health"] * 0.5
+        self.energy = Player.STATS["energy"]
         self.obstacle_sprites = obstacle
 
         self.weapon_handler = WeaponHandler(weapon_creator, weapon_hider)
-        self.magic_handler = MagicHandler(magic_creator, magic_destroyer, magic_obstacle_handler, self)
+        self.magic_handler = MagicHandler(
+            magic_creator, magic_destroyer, magic_obstacle_handler, self
+        )
         self.animation_handler = AnimationHandler(self)
 
     def update(self):
@@ -43,7 +64,7 @@ class Player(Sprite):
             self.energy = ENERGY_BAR_WIDTH
         elif self.energy < 0:
             self.energy = 0
-    
+
     def update_health(self, amount: int):
         self.health += amount
         if self.health > HEALTH_BAR_WIDTH:
@@ -51,12 +72,11 @@ class Player(Sprite):
         elif self.health < 0:
             self.health = 0
 
-
     def get_current_health(self):
-        return (self.health / self.STATS['health']) * 100
+        return (self.health / self.STATS["health"]) * 100
 
     def get_current_energy(self):
-        return (self.energy / self.STATS['energy']) * 100
+        return (self.energy / self.STATS["energy"]) * 100
 
     def get_input(self):
         keys = pygame.key.get_pressed()
@@ -69,18 +89,18 @@ class Player(Sprite):
     def handle_movement_input(self, keys):
         if keys[pygame.K_RIGHT]:
             self.direction.x = 1
-            self.animation_handler.status = 'right'
+            self.animation_handler.status = "right"
         elif keys[pygame.K_LEFT]:
             self.direction.x = -1
-            self.animation_handler.status = 'left'
+            self.animation_handler.status = "left"
         else:
             self.direction.x = 0
         if keys[pygame.K_UP]:
             self.direction.y = -1
-            self.animation_handler.status = 'up'
+            self.animation_handler.status = "up"
         elif keys[pygame.K_DOWN]:
             self.direction.y = 1
-            self.animation_handler.status = 'down'
+            self.animation_handler.status = "down"
         else:
             self.direction.y = 0
 
@@ -102,18 +122,18 @@ class Player(Sprite):
         if self.direction.magnitude() != 0:
             self.direction = self.direction.normalize()
             self.hitbox.x += self.direction.x * self.speed
-            self.handle_obstacle_collision('h')
+            self.handle_obstacle_collision("h")
             self.hitbox.y += self.direction.y * self.speed
-            self.handle_obstacle_collision('v')
+            self.handle_obstacle_collision("v")
             self.rect.center = self.hitbox.center
 
     def handle_obstacle_collision(self, direction: str):
         for obstacle in self.obstacle_sprites.sprites():
-            if direction == 'v':
+            if direction == "v":
                 self.obstacle_collision_v(obstacle)
-            if direction == 'h':
+            if direction == "h":
                 self.obstacle_collision_h(obstacle)
-    
+
     def obstacle_collision_v(self, obstacle: Sprite):
         if self.hitbox.colliderect(obstacle.hitbox):
             if self.direction.y > 0:
@@ -128,6 +148,7 @@ class Player(Sprite):
             elif self.direction.x < 0:
                 self.hitbox.left = obstacle.hitbox.right
 
+
 class WeaponHandler:
     def __init__(self, weapon_creator, weapon_hider):
         self.attacking = False
@@ -135,7 +156,7 @@ class WeaponHandler:
         self.attack_delay = ATTACK_DELAY
         self.create_attack = weapon_creator
         self.hide_weapon = weapon_hider
-        self.weapon = pygame.image.load('graphics/weapons/sword/up.png')
+        self.weapon = pygame.image.load("graphics/weapons/sword/up.png")
 
     def attack(self):
         self.attack_time = pygame.time.get_ticks()
@@ -151,6 +172,7 @@ class WeaponHandler:
             self.attacking = False
             self.hide_weapon()
 
+
 class MagicHandler:
     def __init__(self, magic_creator, magic_destroyer, magic_obstacle_handler, player):
         self.player = player
@@ -163,12 +185,12 @@ class MagicHandler:
         self.magic_index = 0
         self.magic_list = list(magic_data.keys())
         self.magic = self.magic_list[self.magic_index]
-        self.magic_image = pygame.image.load(magic_data[self.magic]['image'])
+        self.magic_image = pygame.image.load(magic_data[self.magic]["image"])
         self.can_switch_magic = True
         self.change_to_idle = False
 
     def attack(self, magic_entity):
-        magic_cost = magic_data[self.magic]['cost']
+        magic_cost = magic_data[self.magic]["cost"]
         self.magic_attack_time = pygame.time.get_ticks()
         self.magic_attacking = True
         self.create_magic(magic_entity)
@@ -177,12 +199,12 @@ class MagicHandler:
     def switch_magic(self):
         self.magic_index += 1
         self.magic = self.magic_list[self.magic_index % len(self.magic_list)]
-        self.magic_image = pygame.image.load(magic_data[self.magic]['image'])
+        self.magic_image = pygame.image.load(magic_data[self.magic]["image"])
         self.can_switch_magic = False
 
     def cooldown(self):
         current_time = pygame.time.get_ticks()
-        magic_time_diff = (current_time - self.magic_attack_time)
+        magic_time_diff = current_time - self.magic_attack_time
         if magic_time_diff >= self.magic_exist_delay:
             self.magic_attacking = False
             self.change_to_idle = False
@@ -192,53 +214,57 @@ class MagicHandler:
 
     def handle_obstacle_collision(self, obstacle_sprites):
         self.handle_magic_obstacle_collision()
-    
+
     def get_current_magic(self):
         return self.magic_image
+
 
 class AnimationHandler:
     def __init__(self, player):
         self.player = player
-        self.status = 'down'
+        self.status = "down"
         self.frame_index = 0
         self.animation_speed = 0.2
         self.animations = {
-            "right_idle": load_frames('graphics/player/right_idle/'),
+            "right_idle": load_frames("graphics/player/right_idle/"),
             "left_idle": load_frames("graphics/player/left_idle/"),
             "up_idle": load_frames("graphics/player/up_idle/"),
             "down_idle": load_frames("graphics/player/down_idle/"),
-            'right_attack': load_frames('graphics/player/right_attack/'),
-            'left_attack': load_frames('graphics/player/left_attack/'),
-            'up_attack': load_frames('graphics/player/up_attack/'),
-            'down_attack': load_frames('graphics/player/down_attack/'),
-            'down': load_frames('graphics/player/down/'),
-            'up': load_frames('graphics/player/up/'),
-            'left': load_frames('graphics/player/left/'),
-            'right': load_frames('graphics/player/right/')
+            "right_attack": load_frames("graphics/player/right_attack/"),
+            "left_attack": load_frames("graphics/player/left_attack/"),
+            "up_attack": load_frames("graphics/player/up_attack/"),
+            "down_attack": load_frames("graphics/player/down_attack/"),
+            "down": load_frames("graphics/player/down/"),
+            "up": load_frames("graphics/player/up/"),
+            "left": load_frames("graphics/player/left/"),
+            "right": load_frames("graphics/player/right/"),
         }
 
     def update_status(self):
         if self.player.direction.x == 0 and self.player.direction.y == 0:
-            if 'idle' not in self.status and 'attack' not in self.status:
-                self.status = self.status + '_idle'
+            if "idle" not in self.status and "attack" not in self.status:
+                self.status = self.status + "_idle"
         if self.player.weapon_handler.attacking:
             self.player.direction = self.player.direction * 0
-            if 'attack' not in self.status:
-                if '_idle' in self.status:
-                    self.status = self.status.replace('_idle', '_attack')
+            if "attack" not in self.status:
+                if "_idle" in self.status:
+                    self.status = self.status.replace("_idle", "_attack")
                 else:
-                    self.status = self.status + '_attack'
-        elif 'attack' in self.status:
-            self.status = self.status.replace('_attack', '_idle')
-        
-        if self.player.magic_handler.magic_attacking and not self.player.magic_handler.change_to_idle:
-            if 'attack' not in self.status:
-                if '_idle' in self.status:
-                    self.status = self.status.replace('_idle', '_attack')
+                    self.status = self.status + "_attack"
+        elif "attack" in self.status:
+            self.status = self.status.replace("_attack", "_idle")
+
+        if (
+            self.player.magic_handler.magic_attacking
+            and not self.player.magic_handler.change_to_idle
+        ):
+            if "attack" not in self.status:
+                if "_idle" in self.status:
+                    self.status = self.status.replace("_idle", "_attack")
                 else:
-                    self.status += '_attack'
+                    self.status += "_attack"
         elif self.player.magic_handler.change_to_idle:
-            self.status = self.status.replace('_attack', '_idle')
+            self.status = self.status.replace("_attack", "_idle")
 
     def animate(self):
         animation = self.animations[self.status]

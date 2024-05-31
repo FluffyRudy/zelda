@@ -15,27 +15,31 @@ class Level:
     def __init__(self):
         self.display_surface: Surface = pygame.display.get_surface()
 
-        self.map_data = TiledMapLoader('maps/tmx/map.tmx')
+        self.map_data = TiledMapLoader("maps/tmx/map.tmx")
 
         self.visible_sprites: YSortCameraGroup = YSortCameraGroup(self.map_data)
         self.obstacle_sprites: Group = Group()
 
         self.setup_level()
-        
+
         self.current_weapon = None
         self.current_magic = None
-        
+
         self.ui = UI(self.player)
 
         self.debug = Debug()
-    
+
     def create_magic_attack(self, magic_entity: dict):
-        magic_type = magic_entity['type']
+        magic_type = magic_entity["type"]
         match magic_type:
-            case 'flame':
-                self.current_magic = Flame(magic_entity, self.player, [self.visible_sprites])
-            case 'heal':
-                self.current_magic = Heal(magic_entity, self.player, [self.visible_sprites])
+            case "flame":
+                self.current_magic = Flame(
+                    magic_entity, self.player, [self.visible_sprites]
+                )
+            case "heal":
+                self.current_magic = Heal(
+                    magic_entity, self.player, [self.visible_sprites]
+                )
 
     def destroy_magic_attack(self):
         if self.current_magic is not None:
@@ -43,7 +47,7 @@ class Level:
         self.current_magic = None
 
     def handle_magic_obstacle_collision(self):
-        if self.current_magic is None or self.current_magic.type == 'heal':
+        if self.current_magic is None or self.current_magic.type == "heal":
             return
 
         for obstacle in self.obstacle_sprites:
@@ -67,14 +71,14 @@ class Level:
 
     def setup_level(self):
         self.player = Player(
-            self.map_data.player_pos, 
-            [self.visible_sprites], 
-            self.obstacle_sprites, 
-            self.show_weapon, 
+            self.map_data.player_pos,
+            [self.visible_sprites],
+            self.obstacle_sprites,
+            self.show_weapon,
             self.hide_weapon,
             self.create_magic_attack,
             self.destroy_magic_attack,
-            self.handle_magic_obstacle_collision
+            self.handle_magic_obstacle_collision,
         )
         self._create_map_objects()
 
@@ -87,6 +91,7 @@ class Level:
             Tile((pos_x, pos_y), [self.obstacle_sprites, self.visible_sprites], image)
         for pos_x, pos_y, image in self.map_data.blocks:
             Tile((pos_x, pos_y), [self.obstacle_sprites, self.visible_sprites], image)
+
 
 class YSortCameraGroup(Group):
     def __init__(self, map_data):
@@ -109,7 +114,7 @@ class YSortCameraGroup(Group):
         for sprite in sorted_sprites:
             offset_rect = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset_rect)
-    
+
     def _draw_floor(self, offset: tuple):
         offset_rect = self.floor_rect.topleft - offset
         self.display_surface.blit(self.floor, offset_rect)
