@@ -6,7 +6,7 @@ from pygame.sprite import Group, GroupSingle, Sprite
 from tile import Tile
 from player import Player
 from weapon import Weapon
-from magic import Magic
+from magic import Flame, Heal
 from ui import UI
 from tiledmaploader import TiledMapLoader
 from debug import Debug
@@ -31,19 +31,24 @@ class Level:
         self.debug = Debug()
     
     def create_magic_attack(self, magic_entity: dict):
-        self.current_magic = Magic(magic_entity, self.player, [self.visible_sprites])
-    
+        magic_type = magic_entity['type']
+        match magic_type:
+            case 'flame':
+                self.current_magic = Flame(magic_entity, self.player, [self.visible_sprites])
+            case 'heal':
+                self.current_magic = Heal(magic_entity, self.player, [self.visible_sprites])
+
     def destroy_magic_attack(self):
         if not self.current_magic is None:
             self.current_magic.kill()
         self.current_magic = None
 
     def handle_magic_obstacle_collision(self):
-        if self.current_magic is None:
+        if self.current_magic is None or self.current_magic.type == 'heal':
             return
 
         for obstacle in self.obstacle_sprites:
-            if self.current_magic.hitbox.colliderect(obstacle.hitbox):
+            if self.current_magic.rect.colliderect(obstacle.hitbox):
                 if pygame.sprite.collide_mask(self.current_magic, obstacle):
                     self.destroy_magic_attack()
                     break

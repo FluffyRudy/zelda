@@ -33,7 +33,7 @@ class Player(Sprite):
         self.direction: Vector2 = Vector2(0, 0)
 
         self.speed  = Player.STATS['speed']
-        self.health = Player.STATS['health']
+        self.health = Player.STATS['health'] * 0.5
         self.energy = Player.STATS['energy']
 
         self.attack_delay = ATTACK_DELAY
@@ -52,10 +52,10 @@ class Player(Sprite):
         self.create_magic = magic_creator
         self.handle_magic_obstacle_collision = magic_obstacle_handler
         self.magic_index = 0
-        self.magic = list(magic_data.keys())[self.magic_index]
-        self.magic_frames = load_frames(magic_data[self.magic]['frames'])
+        self.magic_list = list(magic_data.keys()) 
+        self.magic = self.magic_list[self.magic_index]
+        self.magic_image = pygame.image.load(magic_data[self.magic]['image'])
         self.can_switch_magic = True
-        self.magic_switch_time = pygame.time.get_ticks()
 
         #player animation
         self.status = 'down'
@@ -113,9 +113,29 @@ class Player(Sprite):
                 self.create_magic(magic_data[self.magic])
                 self.update_energy(-magic_cost)
 
+        if keys[pygame.K_LCTRL] and self.can_switch_magic:
+            self.magic_index += 1
+            self.magic = self.magic_list[self.magic_index % len(self.magic_list)]
+            self.magic_image = pygame.image.load(magic_data[self.magic]['image'])
+            self.can_switch_magic = False
+        
+        if not keys[pygame.K_LCTRL] and not self.can_switch_magic:
+            self.can_switch_magic = True
+
     def update_energy(self, amount: int):
         self.energy += amount
-        
+        if self.energy > ENERGY_BAR_WIDTH:
+            self.energy = ENERGY_BAR_WIDTH
+        elif self.energy < 0:
+            self.energy = 0
+    
+    def update_health(self, amount: int):
+        self.health += amount
+        if self.health > HEALTH_BAR_WIDTH:
+            self.health = HEALTH_BAR_WIDTH
+        elif self.health < 0:
+            self.health = 0
+
     def get_status(self):
         if self.direction.x == 0 and self.direction.y == 0:
             if 'idle' not in self.status and 'attack' not in self.status:
@@ -162,6 +182,12 @@ class Player(Sprite):
 
     def get_current_energy(self):
         return (self.energy / self.STATS['energy']) * 100
+
+    def get_current_magic(self):
+        return self.magic_image
+    
+    def get_current_weapon(self):
+        return self.weapon
 
     def update(self):
         self.get_input()
