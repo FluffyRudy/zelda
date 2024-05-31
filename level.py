@@ -1,7 +1,6 @@
 from settings import TILESIZE
 import pygame
 from pygame import Surface
-from pygame import Rect
 from pygame.sprite import Group, GroupSingle, Sprite
 from tile import Tile
 from player import Player
@@ -39,7 +38,7 @@ class Level:
                 self.current_magic = Heal(magic_entity, self.player, [self.visible_sprites])
 
     def destroy_magic_attack(self):
-        if not self.current_magic is None:
+        if self.current_magic is not None:
             self.current_magic.kill()
         self.current_magic = None
 
@@ -57,7 +56,7 @@ class Level:
         self.current_weapon = Weapon(self.player, [self.visible_sprites])
 
     def hide_weapon(self):
-        if not self.current_weapon is None:
+        if self.current_weapon is not None:
             self.current_weapon.kill()
         self.current_weapon = None
 
@@ -77,7 +76,10 @@ class Level:
             self.destroy_magic_attack,
             self.handle_magic_obstacle_collision
         )
-        for pos_x, pos_y,_ in self.map_data.boundries:
+        self._create_map_objects()
+
+    def _create_map_objects(self):
+        for pos_x, pos_y, _ in self.map_data.boundries:
             Tile((pos_x, pos_y), [self.obstacle_sprites])
         for pos_x, pos_y, image in self.map_data.grasses:
             Tile((pos_x, pos_y), [self.obstacle_sprites, self.visible_sprites], image)
@@ -101,13 +103,13 @@ class YSortCameraGroup(Group):
         self.offset.x = relative_sprite.rect.left - self.screen_center_x
         self.offset.y = relative_sprite.rect.top - self.screen_center_y
 
-        self.draw_floor(self.offset)
+        self._draw_floor(self.offset)
 
         sorted_sprites = sorted(self.sprites(), key=lambda sprite: sprite.rect.y)
         for sprite in sorted_sprites:
             offset_rect = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset_rect)
     
-    def draw_floor(self, offset: tuple):
+    def _draw_floor(self, offset: tuple):
         offset_rect = self.floor_rect.topleft - offset
         self.display_surface.blit(self.floor, offset_rect)

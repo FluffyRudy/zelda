@@ -9,7 +9,7 @@ class Flame(pygame.sprite.Sprite):
         super().__init__(groups)
 
         self.type = entity['type']
-        direction = player.status.split('_')[0]
+        direction = player.animation_handler.status.split('_')[0]
         action_map = {
             'left': (-1, 0.5),
             'right': (1, 0.5),

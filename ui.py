@@ -18,12 +18,12 @@ class UI:
         self.offset_x = 10
         self.offset_y = 10
 
-        self.get_current_magic = player.get_current_magic
+        self.get_current_magic = player.magic_handler.get_current_magic
 
         self.set_current_health = player.get_current_health
         self.set_current_energy = player.get_current_energy
         
-        self.weapon_image = player.weapon.copy()
+        self.weapon_image = player.weapon_handler.weapon.copy()
         self.weapon_pos = (
             ITEM_BOX_SIZE // 2 - self.weapon_image.get_width() // 2,
             ITEM_BOX_SIZE//2 - self.weapon_image.get_height()//2
