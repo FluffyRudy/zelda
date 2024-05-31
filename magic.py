@@ -10,8 +10,8 @@ class Magic(pygame.sprite.Sprite):
 
         direction = player.status.split('_')[0]
         action_map = {
-            'left': (-1, 0),
-            'right': (1, 0),
+            'left': (-1, 0.5),
+            'right': (1, 0.5),
             'up': (0, -1),
             'down': (0, 1)
         }
@@ -21,7 +21,12 @@ class Magic(pygame.sprite.Sprite):
         self.animation_speed = 0.1
         self.image = pygame.image.load(entity['image']).convert_alpha()
         self.frames = load_frames(entity['frames'])
-        self.rect = self.image.get_rect(center=player.rect.center)
+
+        dirx, diry = action_map[direction]
+        pos_x = player.rect.centerx + dirx * self.image.get_width() // 2
+        pos_y = player.rect.centery + diry * self.image.get_height() // 2
+        self.rect = self.image.get_rect(center=(pos_x, pos_y))
+        self.hitbox = self.rect.inflate(-20, -20)
         self.traveled_distance = 0
     
     def animate(self):
@@ -33,7 +38,9 @@ class Magic(pygame.sprite.Sprite):
     
     def update(self):
         self.animate()
-        self.rect.x += self.direction.x * self.speed
-        self.rect.y += self.direction.y * self.speed
+        self.hitbox.x += int(self.direction.x) * self.speed
+        self.hitbox.y += int(self.direction.y) * self.speed
         self.traveled_distance += self.speed
+
+        self.rect.center = self.hitbox.center
     

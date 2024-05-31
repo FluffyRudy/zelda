@@ -6,6 +6,7 @@ from pygame.sprite import Group, GroupSingle, Sprite
 from tile import Tile
 from player import Player
 from weapon import Weapon
+from magic import Magic
 from ui import UI
 from tiledmaploader import TiledMapLoader
 from debug import Debug
@@ -23,16 +24,35 @@ class Level:
         self.setup_level()
         
         self.current_weapon = None
+        self.current_magic = None
         
         self.ui = UI(self.player)
 
         self.debug = Debug()
+    
+    def create_magic_attack(self, magic_entity: dict):
+        self.current_magic = Magic(magic_entity, self.player, [self.visible_sprites])
+    
+    def destroy_magic_attack(self):
+        if not self.current_magic is None:
+            self.current_magic.kill()
+        self.current_magic = None
+
+    def handle_magic_obstacle_collision(self):
+        if self.current_magic is None:
+            return
+
+        for obstacle in self.obstacle_sprites:
+            if self.current_magic.hitbox.colliderect(obstacle.hitbox):
+                if pygame.sprite.collide_mask(self.current_magic, obstacle):
+                    self.destroy_magic_attack()
+                    break
 
     def show_weapon(self):
         self.current_weapon = Weapon(self.player, [self.visible_sprites])
 
     def hide_weapon(self):
-        if self.current_weapon:
+        if not self.current_weapon is None:
             self.current_weapon.kill()
         self.current_weapon = None
 
@@ -42,7 +62,16 @@ class Level:
         self.ui.display()
 
     def setup_level(self):
-        self.player = Player(self.map_data.player_pos, [self.visible_sprites], self.obstacle_sprites, self.show_weapon, self.hide_weapon)
+        self.player = Player(
+            self.map_data.player_pos, 
+            [self.visible_sprites], 
+            self.obstacle_sprites, 
+            self.show_weapon, 
+            self.hide_weapon,
+            self.create_magic_attack,
+            self.destroy_magic_attack,
+            self.handle_magic_obstacle_collision
+        )
         for pos_x, pos_y,_ in self.map_data.boundries:
             Tile((pos_x, pos_y), [self.obstacle_sprites])
         for pos_x, pos_y, image in self.map_data.grasses:
