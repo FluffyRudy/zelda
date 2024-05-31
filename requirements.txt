@@ -1,2 +1,5 @@
+mypy==1.10.0
+mypy-extensions==1.0.0
 pygame==2.5.2
 PyTMX==3.32
+typing_extensions==4.12.0
