@@ -5,11 +5,12 @@ from pygame.image import load
 from pygame import Surface, Rect
 from pygame.sprite import Group, GroupSingle, Sprite
 from pygame.math import Vector2
+from character import Character
 from frameloader import load_frames
 from debug import Debug
 
 
-class Player(Sprite):
+class Player(Character):
     STATS = {
         "health": HEALTH_BAR_WIDTH,
         "energy": ENERGY_BAR_WIDTH,
@@ -117,36 +118,6 @@ class Player(Sprite):
             self.magic_handler.switch_magic()
         if not keys[pygame.K_LCTRL] and not self.magic_handler.can_switch_magic:
             self.magic_handler.can_switch_magic = True
-
-    def move(self):
-        if self.direction.magnitude() != 0:
-            self.direction = self.direction.normalize()
-            self.hitbox.x += self.direction.x * self.speed
-            self.handle_obstacle_collision("h")
-            self.hitbox.y += self.direction.y * self.speed
-            self.handle_obstacle_collision("v")
-            self.rect.center = self.hitbox.center
-
-    def handle_obstacle_collision(self, direction: str):
-        for obstacle in self.obstacle_sprites.sprites():
-            if direction == "v":
-                self.obstacle_collision_v(obstacle)
-            if direction == "h":
-                self.obstacle_collision_h(obstacle)
-
-    def obstacle_collision_v(self, obstacle: Sprite):
-        if self.hitbox.colliderect(obstacle.hitbox):
-            if self.direction.y > 0:
-                self.hitbox.bottom = obstacle.hitbox.top
-            elif self.direction.y < 0:
-                self.hitbox.top = obstacle.hitbox.bottom
-
-    def obstacle_collision_h(self, obstacle: Sprite):
-        if self.hitbox.colliderect(obstacle.hitbox):
-            if self.direction.x > 0:
-                self.hitbox.right = obstacle.hitbox.left
-            elif self.direction.x < 0:
-                self.hitbox.left = obstacle.hitbox.right
 
 
 class WeaponHandler:
