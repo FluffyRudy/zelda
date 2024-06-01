@@ -6,6 +6,8 @@ class Character(Sprite):
     def __init__(self, groups):
         super().__init__(groups)
 
+        self.direction = pygame.math.Vector2(0, 0)
+
     def move(self):
         if self.direction.magnitude() != 0:
             self.direction = self.direction.normalize()

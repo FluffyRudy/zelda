@@ -3,6 +3,9 @@ import os
 
 
 def load_frames(path: str):
+    """
+    load image frames for animation
+    """
     if not os.path.exists(path):
         return []
 

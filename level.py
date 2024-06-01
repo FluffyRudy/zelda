@@ -6,6 +6,7 @@ from tile import Tile
 from player import Player
 from weapon import Weapon
 from magic import Flame, Heal
+from enemy import Enemy
 from ui import UI
 from tiledmaploader import TiledMapLoader
 from debug import Debug
@@ -91,6 +92,15 @@ class Level:
             Tile((pos_x, pos_y), [self.obstacle_sprites, self.visible_sprites], image)
         for pos_x, pos_y, image in self.map_data.blocks:
             Tile((pos_x, pos_y), [self.obstacle_sprites, self.visible_sprites], image)
+        for monster_type, pos_x, pos_y, image in self.map_data.enemies:
+            Enemy(
+                monster_type,
+                (pos_x, pos_y),
+                image,
+                self.visible_sprites,
+                self.obstacle_sprites,
+                realtive_sprite=self.player,
+            )
 
 
 class YSortCameraGroup(Group):

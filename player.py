@@ -38,7 +38,6 @@ class Player(Character):
         self.hitbox = self.rect.inflate(0, -20)
 
         # Initializing player attributes
-        self.direction: Vector2 = Vector2(0, 0)
         self.speed = Player.STATS["speed"]
         self.health = Player.STATS["health"] * 0.5
         self.energy = Player.STATS["energy"]
@@ -96,6 +95,7 @@ class Player(Character):
             self.animation_handler.status = "left"
         else:
             self.direction.x = 0
+
         if keys[pygame.K_UP]:
             self.direction.y = -1
             self.animation_handler.status = "up"
@@ -114,9 +114,11 @@ class Player(Character):
             self.magic_handler.attack(magic_data[self.magic_handler.magic])
 
     def handle_magic_switching(self, keys):
-        if keys[pygame.K_LCTRL] and self.magic_handler.can_switch_magic:
-            self.magic_handler.switch_magic()
-        if not keys[pygame.K_LCTRL] and not self.magic_handler.can_switch_magic:
+        if keys[pygame.K_LCTRL]:
+            if self.magic_handler.can_switch_magic:
+                self.magic_handler.switch_magic()
+                self.magic_handler.can_switch_magic = False
+        else:
             self.magic_handler.can_switch_magic = True
 
 
