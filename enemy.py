@@ -39,24 +39,30 @@ class Enemy(Character):
         self.obstacle_sprites = obstacle_sprites
         self.relative_sprite = realtive_sprite
 
-        self.direction_threshold = 10
+        self.can_attack = True
+        self.attack_cooldown = 500
+        self.attack_time = 0
 
         self.animation_handler = AnimationHandler(self, self.relative_sprite)
 
     def update(self):
         self.animation_handler.animate()
         self.animation_handler.get_status()
+        self.animation_handler.attack_cooldown()
         self.move()
         self.actions()
 
     def actions(self):
-        if self.animation_handler.status == "attack":
-            self.direction.x = 0
-            self.direction.y = 0
+        if self.animation_handler.status == "attack" and self.can_attack:
+            self.attack_time = pygame.time.get_ticks()
         elif self.animation_handler.status == "move":
             direction = self.get_vector_from_relative_sprite()[1]
-            self.direction.x = direction[0]
-            self.direction.y = direction[1]
+            if self.can_attack:
+                self.direction.x = direction[0]
+                self.direction.y = direction[1]
+            else:
+                self.direction.x = 0
+                self.direction.y = 0
         else:
             self.direction.x = 0
             self.direction.y = 0
@@ -96,6 +102,8 @@ class AnimationHandler:
         animation = self.animations[self.status]
         self.frame_index += self.animation_speed
         if self.frame_index >= len(animation):
+            if self.status == "attack":
+                self.enemy.can_attack = False
             self.frame_index = 0
 
         self.enemy.image = animation[int(self.frame_index)]
@@ -104,9 +112,15 @@ class AnimationHandler:
     def get_status(self):
         distance, direction = self.enemy.get_vector_from_relative_sprite()
 
-        if distance <= self.enemy.attack_radius:
+        if distance <= self.enemy.attack_radius and self.enemy.can_attack:
             self.status = "attack"
         elif distance <= self.enemy.notice_radius:
             self.status = "move"
         else:
             self.status = "idle"
+
+    def attack_cooldown(self):
+        if not self.enemy.can_attack:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.enemy.attack_time >= self.enemy.attack_cooldown:
+                self.enemy.can_attack = True
