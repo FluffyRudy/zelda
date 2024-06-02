@@ -3,7 +3,7 @@ from settings import monster_data
 from character import Character
 from frameloader import load_frames
 from os.path import join
-from math import hypot
+from math import hypot, sin
 
 
 class Enemy(Character):
@@ -12,9 +12,9 @@ class Enemy(Character):
         monster_type: str,
         pos: tuple[int, int],
         image: pygame.Surface,
-        groups: pygame.sprite.Group,
+        groups: list[pygame.sprite.Group],
         obstacle_sprites: pygame.sprite.Group,
-        realtive_sprite: pygame.sprite.Sprite,
+        relative_sprite: pygame.sprite.Sprite,
     ):
         super().__init__(groups)
 
@@ -37,7 +37,7 @@ class Enemy(Character):
         self.hitbox = self.rect.inflate(0, 0)
 
         self.obstacle_sprites = obstacle_sprites
-        self.relative_sprite = realtive_sprite
+        self.relative_sprite = relative_sprite
 
         self.can_attack = True
         self.attack_cooldown = 500
@@ -76,8 +76,15 @@ class Enemy(Character):
             directon = x_dist / magnitude, y_dist / magnitude
         else:
             directon = (0, 0)
-
         return (magnitude, directon)
+
+    def get_damage(self, damage: int):
+        self.health -= damage
+        if self.health <= 0:
+            self.kill()
+
+    def normalized_sine(self):
+        return int(127.5 * (sin(pygame.time.get_ticks()) + 1))
 
 
 class AnimationHandler:

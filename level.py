@@ -20,6 +20,7 @@ class Level:
 
         self.visible_sprites: YSortCameraGroup = YSortCameraGroup(self.map_data)
         self.obstacle_sprites: Group = Group()
+        self.attackable_sprites: Group = Group()
 
         self.setup_level()
 
@@ -66,6 +67,7 @@ class Level:
         self.current_weapon = None
 
     def run(self):
+        self.handle_enemy_attacking()
         self.visible_sprites.update()
         self.visible_sprites.draw(relative_sprite=self.player)
         self.ui.display()
@@ -97,10 +99,16 @@ class Level:
                 monster_type,
                 (pos_x, pos_y),
                 image,
-                self.visible_sprites,
+                [self.visible_sprites, self.attackable_sprites],
                 self.obstacle_sprites,
-                realtive_sprite=self.player,
+                relative_sprite=self.player,
             )
+
+    def handle_enemy_attacking(self):
+        if self.current_weapon is not None:
+            for sprite in self.attackable_sprites:
+                if self.current_weapon.rect.colliderect(sprite.rect):
+                    sprite.get_damage(self.current_weapon.damage)
 
 
 class YSortCameraGroup(Group):
