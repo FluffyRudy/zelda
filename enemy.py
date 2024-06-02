@@ -43,12 +43,17 @@ class Enemy(Character):
         self.attack_cooldown = 500
         self.attack_time = 0
 
+        self.invincibility_timer = 0
+        self.invincible_duration = 300
+        self.vulnerable = True
+
         self.animation_handler = AnimationHandler(self, self.relative_sprite)
 
     def update(self):
         self.animation_handler.animate()
         self.animation_handler.get_status()
         self.animation_handler.attack_cooldown()
+        self.animation_handler.hit_reaction()
         self.move()
         self.actions()
 
@@ -79,9 +84,12 @@ class Enemy(Character):
         return (magnitude, directon)
 
     def get_damage(self, damage: int):
-        self.health -= damage
-        if self.health <= 0:
-            self.kill()
+        if self.vulnerable:
+            self.vulnerable = False
+            self.invincibility_timer = pygame.time.get_ticks()
+            self.health -= damage
+            if self.health <= 0:
+                self.kill()
 
     def normalized_sine(self):
         return int(127.5 * (sin(pygame.time.get_ticks()) + 1))
@@ -116,6 +124,11 @@ class AnimationHandler:
         self.enemy.image = animation[int(self.frame_index)]
         self.enemy.rect = self.enemy.image.get_rect(center=self.enemy.rect.center)
 
+        if not self.enemy.vulnerable:
+            self.enemy.image.set_alpha(self.enemy.normalized_sine())
+        elif self.enemy.image.get_alpha() != 255:
+            self.enemy.image.set_alpha(255)
+
     def get_status(self):
         distance, direction = self.enemy.get_vector_from_relative_sprite()
 
@@ -127,7 +140,19 @@ class AnimationHandler:
             self.status = "idle"
 
     def attack_cooldown(self):
+        current_timer = pygame.time.get_ticks()
         if not self.enemy.can_attack:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.enemy.attack_time >= self.enemy.attack_cooldown:
+            if current_timer - self.enemy.attack_time >= self.enemy.attack_cooldown:
                 self.enemy.can_attack = True
+
+        if not self.enemy.vulnerable:
+
+            if (
+                current_timer - self.enemy.invincibility_timer
+            ) >= self.enemy.invincible_duration:
+                self.enemy.vulnerable = True
+
+    def hit_reaction(self):
+        if not self.enemy.vulnerable:
+            self.enemy.direction.x *= -10
+            self.enemy.direction.y *= -10
