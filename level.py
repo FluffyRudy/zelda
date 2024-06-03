@@ -7,7 +7,7 @@ from player import Player
 from weapon import Weapon
 from magic import Flame, Heal
 from enemy import Enemy
-from particle import EnemyAttackParticle, Particle, grass_destruction_particle
+from particle import Particle, grass_destruction_particle
 from ui import UI
 from tiledmaploader import TiledMapLoader
 from debug import Debug
@@ -27,7 +27,7 @@ class Level:
 
         self.current_weapon = None
         self.current_magic = None
-        self.particles_list = Group()
+        self.particles_list = ParticleGroup()
 
         self.ui = UI(self.player)
 
@@ -73,6 +73,7 @@ class Level:
         self.visible_sprites.draw(relative_sprite=self.player)
         self.handle_enemy_getting_attacked()
         self.particles_list.update()
+        self.particles_list.update_position(self.player.rect)
         self.particles_list.draw(self.display_surface)
         self.ui.display()
 
@@ -129,8 +130,11 @@ class Level:
     def handle_player_getting_attacked(self, damage: int, attack_type: str):
         if self.player.vulnerable:
             self.particles_list.add(
-                EnemyAttackParticle(
-                    self.player.rect.center, attack_type, self.visible_sprites
+                Particle(
+                    self.player.rect.center,
+                    attack_type,
+                    self.visible_sprites,
+                    is_dynamic=True,
                 )
             )
             self.player.health = max(self.player.health - damage, 0)
@@ -163,3 +167,12 @@ class YSortCameraGroup(Group):
     def _draw_floor(self, offset: tuple):
         offset_rect = self.floor_rect.topleft - offset
         self.display_surface.blit(self.floor, offset_rect)
+
+
+class ParticleGroup(pygame.sprite.Group):
+    def __init__(self):
+        super().__init__()
+
+    def update_position(self, new_rect: pygame.Rect):
+        for sprite in self.sprites():
+            sprite.update_position(new_rect)
