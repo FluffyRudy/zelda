@@ -7,7 +7,7 @@ from player import Player
 from weapon import Weapon
 from magic import Flame, Heal
 from enemy import Enemy
-from particle import EnemyAttackParticle
+from particle import EnemyAttackParticle, Particle, grass_destruction_particle
 from ui import UI
 from tiledmaploader import TiledMapLoader
 from debug import Debug
@@ -27,7 +27,7 @@ class Level:
 
         self.current_weapon = None
         self.current_magic = None
-        self.particles_list = []
+        self.particles_list = Group()
 
         self.ui = UI(self.player)
 
@@ -69,12 +69,11 @@ class Level:
         self.current_weapon = None
 
     def run(self):
-        self.handle_enemy_getting_attacked()
         self.visible_sprites.update()
         self.visible_sprites.draw(relative_sprite=self.player)
-        for particle in self.particles_list:
-            particle.animate()
-            particle.update_position(self.player.rect)
+        self.handle_enemy_getting_attacked()
+        self.particles_list.update()
+        self.particles_list.draw(self.display_surface)
         self.ui.display()
 
     def setup_level(self):
@@ -118,12 +117,18 @@ class Level:
         if self.current_weapon is not None:
             for sprite in self.attackable_sprites:
                 if self.current_weapon.rect.colliderect(sprite.rect):
-                    if pygame.sprite.collide_mask(self.current_weapon, sprite):
-                        sprite.get_damage(self.current_weapon.damage)
+                    if isinstance(sprite, Grass):
+                        center = sprite.rect.center
+                        sprite.kill()
+                        grass_destruction_particle(
+                            center,
+                            [self.visible_sprites, self.particles_list],
+                        )
+                    sprite.get_damage(self.current_weapon.damage)
 
     def handle_player_getting_attacked(self, damage: int, attack_type: str):
         if self.player.vulnerable:
-            self.particles_list.append(
+            self.particles_list.add(
                 EnemyAttackParticle(
                     self.player.rect.center, attack_type, self.visible_sprites
                 )
