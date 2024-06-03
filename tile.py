@@ -31,5 +31,5 @@ class Grass(Tile):
     ):
         super().__init__(pos, group, surface)
 
-    def get_damage(self):
+    def get_damage(self, damage=0):
         pass
