@@ -64,7 +64,7 @@ class Enemy(Character):
             and self.relative_sprite.vulnerable
         ):
             self.attack_time = pygame.time.get_ticks()
-            self.launch_attack(self.damage, "")
+            self.launch_attack(self.damage, self.attack_type)
         elif self.animation_handler.status == "move":
             direction = self.get_vector_from_relative_sprite()[1]
             if self.can_attack:

@@ -2,11 +2,12 @@ from settings import TILESIZE
 import pygame
 from pygame import Surface
 from pygame.sprite import Group, GroupSingle, Sprite
-from tile import Tile
+from tile import Tile, Grass
 from player import Player
 from weapon import Weapon
 from magic import Flame, Heal
 from enemy import Enemy
+from particle import Particle
 from ui import UI
 from tiledmaploader import TiledMapLoader
 from debug import Debug
@@ -26,6 +27,7 @@ class Level:
 
         self.current_weapon = None
         self.current_magic = None
+        self.particles_list = []
 
         self.ui = UI(self.player)
 
@@ -70,6 +72,9 @@ class Level:
         self.handle_enemy_getting_attacked()
         self.visible_sprites.update()
         self.visible_sprites.draw(relative_sprite=self.player)
+        for particle in self.particles_list:
+            particle.animate()
+            particle.update_position(self.player.rect)
         self.ui.display()
 
     def setup_level(self):
@@ -89,7 +94,11 @@ class Level:
         for pos_x, pos_y, _ in self.map_data.boundries:
             Tile((pos_x, pos_y), [self.obstacle_sprites])
         for pos_x, pos_y, image in self.map_data.grasses:
-            Tile((pos_x, pos_y), [self.obstacle_sprites, self.visible_sprites], image)
+            Grass(
+                (pos_x, pos_y),
+                [self.obstacle_sprites, self.visible_sprites, self.attackable_sprites],
+                image,
+            )
         for pos_x, pos_y, image in self.map_data.trees:
             Tile((pos_x, pos_y), [self.obstacle_sprites, self.visible_sprites], image)
         for pos_x, pos_y, image in self.map_data.blocks:
@@ -114,6 +123,9 @@ class Level:
 
     def handle_player_getting_attacked(self, damage: int, attack_type: str):
         if self.player.vulnerable:
+            self.particles_list.append(
+                Particle(self.player.rect.center, attack_type, self.visible_sprites)
+            )
             self.player.health = max(self.player.health - damage, 0)
             self.player.vulnerable = False
             self.player.invincibility_timer = pygame.time.get_ticks()
