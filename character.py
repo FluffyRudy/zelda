@@ -1,5 +1,6 @@
 import pygame
 from pygame.sprite import Sprite
+from math import sin
 
 
 class Character(Sprite):
@@ -7,6 +8,10 @@ class Character(Sprite):
         super().__init__(groups)
 
         self.direction = pygame.math.Vector2(0, 0)
+        self.vulnerable = True
+
+        self.invincibility_timer = 0
+        self.invincible_duration = 300
 
     def move(self):
         if self.direction.magnitude() != 0:
@@ -37,3 +42,6 @@ class Character(Sprite):
                 self.hitbox.right = obstacle.hitbox.left
             elif self.direction.x < 0:
                 self.hitbox.left = obstacle.hitbox.right
+
+    def normalized_sine(self):
+        return int(127.5 * (sin(pygame.time.get_ticks()) + 1))

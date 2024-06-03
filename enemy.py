@@ -4,6 +4,7 @@ from character import Character
 from frameloader import load_frames
 from os.path import join
 from math import hypot, sin
+from typing import Callable
 
 
 class Enemy(Character):
@@ -15,6 +16,7 @@ class Enemy(Character):
         groups: list[pygame.sprite.Group],
         obstacle_sprites: pygame.sprite.Group,
         relative_sprite: pygame.sprite.Sprite,
+        handle_enemy_getting_attacked: Callable,
     ):
         super().__init__(groups)
 
@@ -43,9 +45,7 @@ class Enemy(Character):
         self.attack_cooldown = 500
         self.attack_time = 0
 
-        self.invincibility_timer = 0
-        self.invincible_duration = 300
-        self.vulnerable = True
+        self.launch_attack = handle_enemy_getting_attacked
 
         self.animation_handler = AnimationHandler(self, self.relative_sprite)
 
@@ -58,8 +58,13 @@ class Enemy(Character):
         self.actions()
 
     def actions(self):
-        if self.animation_handler.status == "attack" and self.can_attack:
+        if (
+            self.animation_handler.status == "attack"
+            and self.can_attack
+            and self.relative_sprite.vulnerable
+        ):
             self.attack_time = pygame.time.get_ticks()
+            self.launch_attack(self.damage, "")
         elif self.animation_handler.status == "move":
             direction = self.get_vector_from_relative_sprite()[1]
             if self.can_attack:
@@ -90,9 +95,6 @@ class Enemy(Character):
             self.health -= damage
             if self.health <= 0:
                 self.kill()
-
-    def normalized_sine(self):
-        return int(127.5 * (sin(pygame.time.get_ticks()) + 1))
 
 
 class AnimationHandler:
@@ -132,10 +134,13 @@ class AnimationHandler:
     def get_status(self):
         distance, direction = self.enemy.get_vector_from_relative_sprite()
 
-        if distance <= self.enemy.attack_radius and self.enemy.can_attack:
-            self.status = "attack"
-        elif distance <= self.enemy.notice_radius:
-            self.status = "move"
+        if self.status == "attack" and not self.is_last_frame():
+            return
+        if self.relative_sprite.vulnerable:
+            if distance <= self.enemy.attack_radius and self.enemy.can_attack:
+                self.status = "attack"
+            elif distance <= self.enemy.notice_radius:
+                self.status = "move"
         else:
             self.status = "idle"
 
@@ -156,3 +161,6 @@ class AnimationHandler:
         if not self.enemy.vulnerable:
             self.enemy.direction.x *= -10
             self.enemy.direction.y *= -10
+
+    def is_last_frame(self):
+        return self.frame_index >= len(self.animations[self.status]) - 1

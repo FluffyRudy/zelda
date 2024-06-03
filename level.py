@@ -67,7 +67,7 @@ class Level:
         self.current_weapon = None
 
     def run(self):
-        self.handle_enemy_attacking()
+        self.handle_enemy_getting_attacked()
         self.visible_sprites.update()
         self.visible_sprites.draw(relative_sprite=self.player)
         self.ui.display()
@@ -101,14 +101,22 @@ class Level:
                 image,
                 [self.visible_sprites, self.attackable_sprites],
                 self.obstacle_sprites,
-                relative_sprite=self.player,
+                self.player,
+                self.handle_player_getting_attacked,
             )
 
-    def handle_enemy_attacking(self):
+    def handle_enemy_getting_attacked(self):
         if self.current_weapon is not None:
             for sprite in self.attackable_sprites:
                 if self.current_weapon.rect.colliderect(sprite.rect):
-                    sprite.get_damage(self.current_weapon.damage)
+                    if pygame.sprite.collide_mask(self.current_weapon, sprite):
+                        sprite.get_damage(self.current_weapon.damage)
+
+    def handle_player_getting_attacked(self, damage: int, attack_type: str):
+        if self.player.vulnerable:
+            self.player.health = max(self.player.health - damage, 0)
+            self.player.vulnerable = False
+            self.player.invincibility_timer = pygame.time.get_ticks()
 
 
 class YSortCameraGroup(Group):

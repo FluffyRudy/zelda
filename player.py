@@ -43,6 +43,8 @@ class Player(Character):
         self.energy = Player.STATS["energy"]
         self.obstacle_sprites = obstacle
 
+        self.invincible_duration = 1000
+
         self.weapon_handler = WeaponHandler(weapon_creator, weapon_hider)
         self.magic_handler = MagicHandler(
             magic_creator, magic_destroyer, magic_obstacle_handler, self
@@ -57,6 +59,7 @@ class Player(Character):
         self.animation_handler.update_status()
         self.animation_handler.animate()
         self.magic_handler.handle_obstacle_collision(self.obstacle_sprites)
+        self.handle_vulnerability()
 
     def update_energy(self, amount: int):
         self.energy += amount
@@ -67,6 +70,7 @@ class Player(Character):
 
     def update_health(self, amount: int):
         self.health += amount
+
         if self.health > HEALTH_BAR_WIDTH:
             self.health = HEALTH_BAR_WIDTH
         elif self.health < 0:
@@ -120,6 +124,15 @@ class Player(Character):
                 self.magic_handler.can_switch_magic = False
         else:
             self.magic_handler.can_switch_magic = True
+
+    def handle_vulnerability(self):
+        current_time = pygame.time.get_ticks()
+        if not self.vulnerable:
+            if current_time - self.invincibility_timer >= self.invincible_duration:
+                self.vulnerable = True
+            self.image.set_alpha(self.normalized_sine())
+        elif self.image.get_alpha() != 255:
+            self.image.set_alpha(255)
 
 
 class WeaponHandler:
