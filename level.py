@@ -7,7 +7,7 @@ from player import Player
 from weapon import Weapon
 from magic import Flame, Heal
 from enemy import Enemy
-from particle import Particle
+from particle import EnemyAttackParticle
 from ui import UI
 from tiledmaploader import TiledMapLoader
 from debug import Debug
@@ -124,7 +124,9 @@ class Level:
     def handle_player_getting_attacked(self, damage: int, attack_type: str):
         if self.player.vulnerable:
             self.particles_list.append(
-                Particle(self.player.rect.center, attack_type, self.visible_sprites)
+                EnemyAttackParticle(
+                    self.player.rect.center, attack_type, self.visible_sprites
+                )
             )
             self.player.health = max(self.player.health - damage, 0)
             self.player.vulnerable = False

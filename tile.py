@@ -30,3 +30,6 @@ class Grass(Tile):
         surface=pygame.Surface((TILESIZE, TILESIZE)),
     ):
         super().__init__(pos, group, surface)
+
+    def get_damage(self):
+        pass

@@ -1,5 +1,7 @@
 import pygame
 from os.path import join
+from os import listdir
+from random import randint
 from frameloader import load_frames
 from typing import Iterable
 
@@ -29,15 +31,15 @@ class Particle(pygame.sprite.Sprite):
             self.kill()
         self.image = self.frames[int(self.frame_index)]
 
-    def update_position(self, player_rect: pygame.Rect):
-        self.rect.center = player_rect.center
 
-
-class GrassDestructionEffect:
+class EnemyAttackParticle(Particle):
     def __init__(
         self,
         pos: tuple[int, int],
+        particle_type: str,
         groups: Iterable[pygame.sprite.Group],
     ):
+        super().__init__(pos, particle_type, groups)
 
-        self.animation_frames = []
+    def update_position(self, player_rect: pygame.Rect):
+        self.rect.center = player_rect.center
