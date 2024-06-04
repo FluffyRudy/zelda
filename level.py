@@ -148,6 +148,7 @@ class Level:
                     if attack_type.rect.colliderect(sprite.hitbox):
                         if pygame.sprite.collide_mask(attack_type, sprite):
                             if isinstance(sprite, Grass):
+                                self.player.update_exp(10)
                                 center = sprite.hitbox.center
                                 sprite.kill()
                                 grass_destruction_particle(
@@ -200,7 +201,7 @@ class YSortCameraGroup(Group):
         self.floor = map_data.ground
         self.floor_rect = self.floor.get_rect(topleft=(0, 0))
 
-        # Set the visibility bound to -100 to ensure sprites become visible when they are within 100 pixels off-screen.
+        # Set the visibility bound to 100 to ensure sprites become visible when they are within 100 pixels off-screen.
         self.visibility_bound = 100
 
     def draw(self, relative_sprite: Sprite):
