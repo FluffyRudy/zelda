@@ -201,7 +201,7 @@ class YSortCameraGroup(Group):
         self.floor_rect = self.floor.get_rect(topleft=(0, 0))
 
         # Set the visibility bound to -100 to ensure sprites become visible when they are within 100 pixels off-screen.
-        self.visibility_bound = -100
+        self.visibility_bound = 100
 
     def draw(self, relative_sprite: Sprite):
         self.offset.x = relative_sprite.rect.left - self.screen_center_x
