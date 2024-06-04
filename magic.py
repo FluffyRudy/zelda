@@ -19,6 +19,7 @@ class Flame(pygame.sprite.Sprite):
             "down": (0, 1),
         }
 
+        self.strength = entity["strength"]
         self.speed = 8
         self.direction = Vector2(action_map[direction])
         self.frame_index = 0
@@ -52,6 +53,8 @@ class Heal(pygame.sprite.Sprite):
         player.update_health(entity["strength"])
 
         self.type = entity["type"]
+        self.strength = entity["strength"]
+
         self.follow_rect = player.rect
 
         self.player = player

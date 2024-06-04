@@ -40,6 +40,7 @@ class Level:
                 self.current_magic = Flame(
                     magic_entity, self.player, [self.visible_sprites]
                 )
+
             case "heal":
                 self.current_magic = Heal(
                     magic_entity, self.player, [self.visible_sprites]
@@ -47,6 +48,18 @@ class Level:
 
     def destroy_magic_attack(self):
         if self.current_magic is not None:
+            centerx, centery = self.current_magic.rect.center
+            match self.current_magic.type:
+                case "flame":
+                    for i in range(3):
+                        pos_x = centerx + i * self.current_magic.image.get_width()
+                        pos_y = centery
+                        Particle(
+                            (pos_x, pos_y),
+                            "flame/frames",
+                            self.visible_sprites,
+                            is_dynamic=True,
+                        )
             self.current_magic.kill()
         self.current_magic = None
 
@@ -115,17 +128,24 @@ class Level:
             )
 
     def handle_enemy_getting_attacked(self):
-        if self.current_weapon is not None:
-            for sprite in self.attackable_sprites:
-                if self.current_weapon.rect.colliderect(sprite.rect):
-                    if isinstance(sprite, Grass):
-                        center = sprite.rect.center
-                        sprite.kill()
-                        grass_destruction_particle(
-                            center,
-                            [self.visible_sprites, self.particles_list],
-                        )
-                    sprite.get_damage(self.current_weapon.damage)
+        for attack_type in [self.current_weapon, self.current_magic]:
+            if attack_type is not None:
+                for sprite in self.attackable_sprites:
+                    if attack_type.rect.colliderect(sprite.rect):
+                        if isinstance(sprite, Grass):
+                            center = sprite.rect.center
+                            sprite.kill()
+                            grass_destruction_particle(
+                                center,
+                                [self.visible_sprites, self.particles_list],
+                            )
+                        if attack_type == self.current_weapon:
+                            self.hide_weapon()
+                            sprite.get_damage(attack_type.damage)
+                        else:
+                            self.destroy_magic_attack()
+                            sprite.get_damage(attack_type.strength)
+                        break
 
     def handle_player_getting_attacked(self, damage: int, attack_type: str):
         if self.player.vulnerable:

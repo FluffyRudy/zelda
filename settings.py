@@ -18,7 +18,7 @@ ENERGY_COLOR = (0, 126, 255)
 magic_data = {
     "flame": {
         "type": "flame",
-        "strength": 5,
+        "strength": 30,
         "cost": 20,
         "image": "graphics/particles/flame/fire.png",
         "frames": "graphics/particles/flame/frames/",
