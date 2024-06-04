@@ -13,7 +13,7 @@ class Game:
         pygame.display.set_caption("ZELDA")
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.viewport = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
-        self.viewport_bg = pygame.Color(0, 0, 0, 0)
+        self.contrast_alpha = pygame.Color(0, 0, 0, 0)
         self.clock = pygame.time.Clock()
 
         self.level = Level()
@@ -24,13 +24,13 @@ class Game:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                self.viewport_bg.a = min(self.viewport_bg.a + 10, 255)
+                self.contrast_alpha.a = min(self.contrast_alpha.a + 10, 255)
 
     def run(self) -> None:
         while True:
             self.handle_event()
             self.level.run()
-            self.viewport.fill(self.viewport_bg)
+            self.viewport.fill(self.contrast_alpha)
             self.screen.blit(self.viewport, (0, 0))
             pygame.display.update()
             self.clock.tick(FPS)
