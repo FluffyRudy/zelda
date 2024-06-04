@@ -1,4 +1,4 @@
-from settings import TILESIZE
+from settings import TILESIZE, magic_data
 import pygame
 from pygame import Surface
 from pygame.sprite import Group, GroupSingle, Sprite
@@ -22,12 +22,12 @@ class Level:
         self.visible_sprites: YSortCameraGroup = YSortCameraGroup(self.map_data)
         self.obstacle_sprites: Group = Group()
         self.attackable_sprites: Group = Group()
+        self.particles_list = ParticleGroup()
 
         self.setup_level()
 
         self.current_weapon = None
         self.current_magic = None
-        self.particles_list = ParticleGroup()
 
         self.ui = UI(self.player)
 
@@ -57,8 +57,9 @@ class Level:
                         Particle(
                             (pos_x, pos_y),
                             "flame/frames",
-                            self.visible_sprites,
-                            is_dynamic=True,
+                            [self.visible_sprites, self.particles_list],
+                            is_dynamic=False,
+                            kill_time=1500,
                         )
             self.current_magic.kill()
         self.current_magic = None
@@ -84,10 +85,11 @@ class Level:
     def run(self):
         self.visible_sprites.update()
         self.visible_sprites.draw(relative_sprite=self.player)
-        self.handle_enemy_getting_attacked()
         self.particles_list.update()
         self.particles_list.update_position(self.player.rect)
         self.particles_list.draw(self.display_surface)
+        self.handle_enemy_getting_attacked()
+        self.handle_partical_effect_collision()
         self.ui.display()
 
     def setup_level(self):
@@ -160,6 +162,16 @@ class Level:
             self.player.health = max(self.player.health - damage, 0)
             self.player.vulnerable = False
             self.player.invincibility_timer = pygame.time.get_ticks()
+
+    def handle_partical_effect_collision(self):
+        collided_sprites = pygame.sprite.groupcollide(
+            self.particles_list, self.attackable_sprites, False, False
+        )
+        for particle, enemy_list in collided_sprites.items():
+            for enemy in enemy_list:
+                match particle._type:
+                    case "flame":
+                        enemy.get_damage(magic_data["flame"]["burn_strength"])
 
 
 class YSortCameraGroup(Group):

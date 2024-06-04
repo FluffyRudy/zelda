@@ -19,6 +19,7 @@ magic_data = {
     "flame": {
         "type": "flame",
         "strength": 30,
+        "burn_strength": 5,
         "cost": 20,
         "image": "graphics/particles/flame/fire.png",
         "frames": "graphics/particles/flame/frames/",

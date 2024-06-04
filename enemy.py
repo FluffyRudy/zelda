@@ -70,9 +70,6 @@ class Enemy(Character):
             if self.can_attack:
                 self.direction.x = direction[0]
                 self.direction.y = direction[1]
-            else:
-                self.direction.x = 0
-                self.direction.y = 0
         else:
             self.direction.x = 0
             self.direction.y = 0
@@ -136,11 +133,14 @@ class AnimationHandler:
 
         if self.status == "attack" and not self.is_last_frame():
             return
+
         if self.relative_sprite.vulnerable:
             if distance <= self.enemy.attack_radius and self.enemy.can_attack:
                 self.status = "attack"
             elif distance <= self.enemy.notice_radius:
                 self.status = "move"
+            else:
+                self.status = "idle"
         else:
             self.status = "idle"
 
@@ -159,8 +159,12 @@ class AnimationHandler:
 
     def hit_reaction(self):
         if not self.enemy.vulnerable:
-            self.enemy.direction.x *= -10
-            self.enemy.direction.y *= -10
+            """
+                1 is added to ensure enemy get hit reaction
+                even if player attack from radius > notice_radius
+            """
+            self.enemy.direction.x = (self.enemy.direction.x + 1) * -10
+            self.enemy.direction.y = (self.enemy.direction.y + 1) * -10
 
     def is_last_frame(self):
         return self.frame_index >= len(self.animations[self.status]) - 1
