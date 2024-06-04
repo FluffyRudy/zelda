@@ -101,7 +101,7 @@ class Level:
         self.particles_list.update_position(self.player.rect)
         self.particles_list.draw(self.display_surface)
         self.handle_enemy_getting_attacked()
-        self.handle_partical_effect_collision()
+        self.handle_particle_effect_collision()
         self.ui.display()
 
     def setup_level(self):
@@ -146,20 +146,21 @@ class Level:
             if attack_type is not None:
                 for sprite in self.attackable_sprites:
                     if attack_type.rect.colliderect(sprite.hitbox):
-                        if isinstance(sprite, Grass):
-                            center = sprite.hitbox.center
-                            sprite.kill()
-                            grass_destruction_particle(
-                                center,
-                                [self.visible_sprites, self.particles_list],
-                            )
-                        if attack_type == self.current_weapon:
-                            self.hide_weapon()
-                            sprite.get_damage(attack_type.damage)
-                        else:
-                            self.destroy_magic_attack()
-                            sprite.get_damage(attack_type.strength)
-                        break
+                        if pygame.sprite.collide_mask(attack_type, sprite):
+                            if isinstance(sprite, Grass):
+                                center = sprite.hitbox.center
+                                sprite.kill()
+                                grass_destruction_particle(
+                                    center,
+                                    [self.visible_sprites, self.particles_list],
+                                )
+                            if attack_type == self.current_weapon:
+                                self.hide_weapon()
+                                sprite.get_damage(attack_type.damage)
+                            else:
+                                self.destroy_magic_attack()
+                                sprite.get_damage(attack_type.strength)
+                            break
 
     def handle_player_getting_attacked(self, damage: int, attack_type: str):
         if self.player.vulnerable:
@@ -175,15 +176,17 @@ class Level:
             self.player.vulnerable = False
             self.player.invincibility_timer = pygame.time.get_ticks()
 
-    def handle_partical_effect_collision(self):
+    def handle_particle_effect_collision(self):
         collided_sprites = pygame.sprite.groupcollide(
             self.particles_list, self.attackable_sprites, False, False
         )
         for particle, enemy_list in collided_sprites.items():
             for enemy in enemy_list:
-                match particle._type:
-                    case "flame":
-                        enemy.get_damage(magic_data["flame"]["burn_strength"])
+                if particle.rect.colliderect(enemy.hitbox):
+                    if pygame.sprite.collide_mask(particle, enemy):
+                        match particle._type:
+                            case "flame":
+                                enemy.get_damage(magic_data["flame"]["burn_strength"])
 
 
 class YSortCameraGroup(Group):
@@ -207,6 +210,10 @@ class YSortCameraGroup(Group):
         for sprite in sorted_sprites:
             offset_rect = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset_rect)
+            if isinstance(sprite, Enemy):
+                pygame.draw.rect(
+                    self.display_surface, "red", (*offset_rect, *sprite.hitbox.size), 5
+                )
 
     def _draw_floor(self, offset: tuple):
         offset_rect = self.floor_rect.topleft - offset

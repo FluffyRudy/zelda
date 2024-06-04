@@ -122,6 +122,7 @@ class AnimationHandler:
 
         self.enemy.image = animation[int(self.frame_index)]
         self.enemy.rect = self.enemy.image.get_rect(center=self.enemy.rect.center)
+        self.enemy.hitbox.center = self.enemy.rect.center
 
         if not self.enemy.vulnerable:
             self.enemy.image.set_alpha(self.enemy.normalized_sine())

@@ -34,6 +34,7 @@ class Particle(pygame.sprite.Sprite):
 
         self.is_dynamic = is_dynamic
         self._type = particle_type.split("/")[0]
+        self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
         if self.time_controlled:
