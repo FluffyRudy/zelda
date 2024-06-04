@@ -10,7 +10,7 @@ class Game:
 
     def __init__(self):
         pygame.init()
-        pygame.display.set_caption("Might And Magic")
+        pygame.display.set_caption("ZELDA")
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
 
