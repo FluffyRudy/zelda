@@ -200,6 +200,9 @@ class YSortCameraGroup(Group):
         self.floor = map_data.ground
         self.floor_rect = self.floor.get_rect(topleft=(0, 0))
 
+        # Set the visibility bound to -100 to ensure sprites become visible when they are within 100 pixels off-screen.
+        self.visibility_bound = -100
+
     def draw(self, relative_sprite: Sprite):
         self.offset.x = relative_sprite.rect.left - self.screen_center_x
         self.offset.y = relative_sprite.rect.top - self.screen_center_y
@@ -209,15 +212,27 @@ class YSortCameraGroup(Group):
         sorted_sprites = sorted(self.sprites(), key=lambda sprite: sprite.rect.y)
         for sprite in sorted_sprites:
             offset_rect = sprite.rect.topleft - self.offset
-            self.display_surface.blit(sprite.image, offset_rect)
-            if isinstance(sprite, Enemy):
-                pygame.draw.rect(
-                    self.display_surface, "red", (*offset_rect, *sprite.hitbox.size), 5
-                )
+            if self._is_sprite_visible(offset_rect, sprite):
+                self.display_surface.blit(sprite.image, offset_rect)
+                if isinstance(sprite, Enemy):
+                    pygame.draw.rect(
+                        self.display_surface,
+                        "red",
+                        (*offset_rect, *sprite.hitbox.size),
+                        5,
+                    )
 
     def _draw_floor(self, offset: tuple):
         offset_rect = self.floor_rect.topleft - offset
         self.display_surface.blit(self.floor, offset_rect)
+
+    def _is_sprite_visible(self, offset_rect, sprite):
+        return (
+            -self.visibility_bound <= offset_rect.x <= self.display_surface.get_width()
+            and -self.visibility_bound
+            <= offset_rect.y
+            <= self.display_surface.get_height()
+        )
 
 
 class ParticleGroup(pygame.sprite.Group):
