@@ -74,7 +74,10 @@ class Enemy(Character):
             self.direction.x = 0
             self.direction.y = 0
 
-    def get_vector_from_relative_sprite(self):
+    def get_vector_from_relative_sprite(self) -> tuple[float, float]:
+        """
+        returns distance and direction between player and self
+        """
         relative_rect: pygame.Rect = self.relative_sprite.rect
         x_dist = relative_rect.centerx - self.hitbox.centerx
         y_dist = relative_rect.centery - self.hitbox.centery
@@ -91,6 +94,7 @@ class Enemy(Character):
             self.invincibility_timer = pygame.time.get_ticks()
             self.health -= damage
             if self.health <= 0:
+                self.relative_sprite.update_exp(self.exp)
                 self.kill()
 
 
@@ -164,8 +168,9 @@ class AnimationHandler:
                 1 is added to ensure enemy get hit reaction
                 even if player attack from radius > notice_radius
             """
-            self.enemy.direction.x = (self.enemy.direction.x + 1) * -10
-            self.enemy.direction.y = (self.enemy.direction.y + 1) * -10
+            _, direction = self.enemy.get_vector_from_relative_sprite()
+            self.enemy.direction.x = (direction[0]) * -10 
+            self.enemy.direction.y = (direction[1] ) * -10 
 
     def is_last_frame(self):
         return self.frame_index >= len(self.animations[self.status]) - 1
