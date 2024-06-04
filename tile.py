@@ -5,10 +5,18 @@ from pygame import Surface
 from pygame import Rect
 from pygame.sprite import Group, GroupSingle
 from frameloader import load_frames
-from typing import Iterable
+from particle import grass_destruction_particle
+from typing import Iterable, Optional, TypedDict
+
+
+class ParticlesGroupType(TypedDict):
+    visibility_group: pygame.sprite.Group
+    particle_group: pygame.sprite.Group
 
 
 class Tile(pygame.sprite.Sprite):
+    PARTICLE_GROUP: Optional[ParticlesGroupType] = None
+
     def __init__(
         self,
         pos: tuple[int, int],
@@ -31,5 +39,17 @@ class Grass(Tile):
     ):
         super().__init__(pos, group, surface)
 
+    @classmethod
+    def set_particle_groups(cls, group_dict: ParticlesGroupType):
+        cls.PARTICLE_GROUP = group_dict
+
     def get_damage(self, damage=0):
-        pass
+        center = self.hitbox.center
+        grass_destruction_particle(
+            center,
+            [
+                self.PARTICLE_GROUP["visible_group"],
+                self.PARTICLE_GROUP["particle_group"],
+            ],
+        )
+        self.kill()

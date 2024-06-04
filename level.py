@@ -25,6 +25,12 @@ class Level:
         self.particles_list = ParticleGroup()
 
         self.setup_level()
+        Grass.set_particle_groups(
+            {
+                "visible_group": self.visible_sprites,
+                "particle_group": self.particles_list,
+            }
+        )
 
         self.current_weapon = None
         self.current_magic = None
@@ -45,6 +51,12 @@ class Level:
                 self.current_magic = Heal(
                     magic_entity, self.player, [self.visible_sprites]
                 )
+        Particle(
+            self.player.rect.midbottom,
+            "aura",
+            [self.visible_sprites, self.particles_list],
+            is_dynamic=True,
+        )
 
     def destroy_magic_attack(self):
         if self.current_magic is not None:
@@ -133,9 +145,9 @@ class Level:
         for attack_type in [self.current_weapon, self.current_magic]:
             if attack_type is not None:
                 for sprite in self.attackable_sprites:
-                    if attack_type.rect.colliderect(sprite.rect):
+                    if attack_type.rect.colliderect(sprite.hitbox):
                         if isinstance(sprite, Grass):
-                            center = sprite.rect.center
+                            center = sprite.hitbox.center
                             sprite.kill()
                             grass_destruction_particle(
                                 center,
