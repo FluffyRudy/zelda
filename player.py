@@ -15,8 +15,8 @@ class Player(Character):
         "health": HEALTH_BAR_WIDTH,
         "energy": ENERGY_BAR_WIDTH,
         "attack": SPEED,
-        "magic": "4",
         "speed": SPEED,
+        "exp": EXP,
     }
 
     def __init__(
@@ -41,6 +41,7 @@ class Player(Character):
         self.speed = Player.STATS["speed"]
         self.health = Player.STATS["health"] * 0.5
         self.energy = Player.STATS["energy"]
+        self.exp = Player.STATS["exp"]
         self.obstacle_sprites = obstacle
 
         self.invincible_duration = 1000
@@ -81,6 +82,12 @@ class Player(Character):
 
     def get_current_energy(self):
         return (self.energy / self.STATS["energy"]) * 100
+
+    def update_exp(self, exp: int):
+        self.exp += exp
+
+    def get_current_exp(self):
+        return self.exp
 
     def get_input(self):
         keys = pygame.key.get_pressed()

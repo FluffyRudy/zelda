@@ -14,6 +14,7 @@ DAMAGE = 10
 LOWER_LAYER_COLOR = (58, 0, 59)
 HEALTH_COLOR = (255, 102, 0)
 ENERGY_COLOR = (0, 126, 255)
+EXP = 0
 
 magic_data = {
     "flame": {
