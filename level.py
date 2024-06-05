@@ -63,7 +63,7 @@ class Level:
             centerx, centery = self.current_magic.rect.center
             match self.current_magic.type:
                 case "flame":
-                    for i in range(3):
+                    for i in range(-1, 2):
                         pos_x = centerx + i * self.current_magic.image.get_width()
                         pos_y = centery
                         Particle(
