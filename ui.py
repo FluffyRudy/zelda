@@ -9,6 +9,7 @@ from settings import (
     ENERGY_COLOR,
     LOWER_LAYER_COLOR,
 )
+from pygame.math import Vector2
 import pygame
 
 
@@ -47,9 +48,8 @@ class UI:
 
         self.lower_health_layer_rect = self.health_bar_rect.copy()
         self.lower_energy_layer_rect = self.energy_bar_rect.copy()
-        self.exp_label_pos = (
-            self.offset_x,
-            self.lower_energy_layer_rect.bottom + self.offset_y,
+        self.exp_label_pos = Vector2(
+            self.display_surface.get_width(), self.display_surface.get_height()
         )
 
         self.item_box_surf = pygame.Surface(
@@ -72,8 +72,13 @@ class UI:
         pygame.draw.rect(
             self.display_surface, LOWER_LAYER_COLOR, self.lower_energy_layer_rect, 0, 3
         )
-        exp_label = self.font.render(f"{self.get_player_exp()}", True, "white", "black")
-        self.display_surface.blit(exp_label, self.exp_label_pos)
+        exp_label = self.font.render(
+            f" {self.get_player_exp()} ", True, "white", "black"
+        )
+        self.display_surface.blit(
+            exp_label,
+            self.exp_label_pos - (exp_label.get_width(), exp_label.get_height()),
+        )
         pygame.draw.rect(self.display_surface, HEALTH_COLOR, self.health_bar_rect, 0, 3)
         pygame.draw.rect(self.display_surface, ENERGY_COLOR, self.energy_bar_rect, 0, 3)
         self.health_bar_rect.width = self.get_player_health()
