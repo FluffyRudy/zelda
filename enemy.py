@@ -1,6 +1,7 @@
 import pygame
 from settings import monster_data
 from character import Character
+from particle import Particle
 from frameloader import load_frames
 from os.path import join
 from math import hypot, sin
@@ -95,6 +96,7 @@ class Enemy(Character):
             self.health -= damage
             if self.health <= 0:
                 self.relative_sprite.update_exp(self.exp)
+                Particle(self.hitbox.center, 'smoke_orange', self.relative_sprite.groups())
                 self.kill()
 
 
