@@ -89,6 +89,9 @@ class Player(Character):
     def get_current_exp(self):
         return self.exp
 
+    def get_current_status(self):
+        return self.animation_handler.status
+
     def get_input(self):
         keys = pygame.key.get_pressed()
         if not self.weapon_handler.attacking:
