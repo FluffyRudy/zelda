@@ -63,9 +63,19 @@ class Level:
             centerx, centery = self.current_magic.rect.center
             match self.current_magic.type:
                 case "flame":
-                    for i in range(-1, 2):
-                        pos_x = centerx + i * self.current_magic.image.get_width()
-                        pos_y = centery
+                    direction = self.player.get_current_status().split("_")[0]
+                    x_dir, y_dir = (
+                        (1, 0)
+                        if direction not in ("up", "down")
+                        else (0, -1) if direction == "up" else (0, 1)
+                    )
+                    for i in range(-3, 3):
+                        pos_x = (
+                            centerx + i * self.current_magic.image.get_width() * x_dir
+                        )
+                        pos_y = (
+                            centery + i * self.current_magic.image.get_height() * y_dir
+                        )
                         Particle(
                             (pos_x, pos_y),
                             "flame/frames",
