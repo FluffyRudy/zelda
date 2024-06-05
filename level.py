@@ -39,6 +39,9 @@ class Level:
 
         self.debug = Debug()
 
+    def get_player(self):
+        return self.player
+
     def create_magic_attack(self, magic_entity: dict):
         magic_type = magic_entity["type"]
         match magic_type:
@@ -112,7 +115,6 @@ class Level:
         self.particles_list.draw(self.display_surface)
         self.handle_enemy_getting_attacked()
         self.handle_particle_effect_collision()
-        self.ui.display()
 
     def setup_level(self):
         self.player = Player(
