@@ -7,7 +7,6 @@ from pygame.sprite import Group, GroupSingle, Sprite
 from pygame.math import Vector2
 from character import Character
 from frameloader import load_frames
-from debug import Debug
 
 
 class Player(Character):
