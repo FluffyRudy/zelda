@@ -10,7 +10,6 @@ from enemy import Enemy
 from particle import Particle, grass_destruction_particle
 from ui import UI
 from tiledmaploader import TiledMapLoader
-from debug import Debug
 
 
 class Level:
@@ -36,8 +35,6 @@ class Level:
         self.current_magic = None
 
         self.ui = UI(self.player)
-
-        self.debug = Debug()
 
     def get_player(self):
         return self.player
