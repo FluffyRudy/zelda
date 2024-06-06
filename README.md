@@ -25,13 +25,13 @@ Depending on your operating system, activate virtual environment:
 - **Linux/macOS:**
 
   ```
-  source venv/bin/activate
+  source .env/bin/activate
   ```
 
 - **Windows:**
 
   ```
-  venv\Scripts\activate
+  .env\Scripts\activate
   ```
 
 4. **Install the required packages:**
