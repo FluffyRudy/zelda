@@ -1,116 +1,155 @@
 import pygame
-from typing import Optional, Callable
-from settings import UPGRADE_BOX_SIZE, GEAR_SIZE
 
 
 class Upgrade:
-    def __init__(self, player):
+    def __init__(self, player: pygame.sprite.Sprite):
         self.display_surface = pygame.display.get_surface()
-        self.num_boxes = 4
-        self.spacing = 10
+        self.player = player
+        self.max_player_attrs = len(player.STATS)
+        self.font = pygame.font.Font("graphics/font/joystix.ttf", 24)
 
-        self.positions = self.calculate_positions()
         self.selection_index = 0
+        self.selection_time = None
+        self.cooldown = 300
+        self.can_move = True
 
-        # Initialize upgrade boxes
-        self.health_box = UpgradeBox(self.positions[0], "HEALTH")
-        self.energy_box = UpgradeBox(self.positions[1], "ENERGY")
-        self.weapon_box = UpgradeBox(self.positions[2], "WEAPON")
-        self.magic_box = UpgradeBox(self.positions[3], "MAGIC")
+        font = pygame.font.Font("graphics/font/joystix.ttf", 25)
+        UpgradeBox.set_font(font=font)
+        self.upgrade_box_height = self.display_surface.get_height() * 0.8
+        self.upgrade_box_width = (
+            self.display_surface.get_width() - 100
+        ) // self.max_player_attrs
+        self.start_pos_x = (
+            self.display_surface.get_width()
+            - self.upgrade_box_width * self.max_player_attrs
+            - self.max_player_attrs * 10
+        ) // 2
 
-    def calculate_positions(self):
-        total_width = (
-            self.num_boxes * UPGRADE_BOX_SIZE[0] + (self.num_boxes - 1) * self.spacing
-        )
-        offset_x = (self.display_surface.get_width() - total_width) // 2
-        offset_y = (self.display_surface.get_height() - UPGRADE_BOX_SIZE[1]) // 2
+        self.create_upgrade_box()
 
-        return [
-            (offset_x + i * (UPGRADE_BOX_SIZE[0] + self.spacing), offset_y)
-            for i in range(self.num_boxes)
-        ]
+    def get_input(self):
+        keys = pygame.key.get_pressed()
+
+        if self.can_move:
+            if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT] or keys[pygame.K_SPACE]:
+                self.can_move = False
+                self.selection_time = pygame.time.get_ticks()
+            if keys[pygame.K_RIGHT]:
+                self.selection_index += 1
+            elif keys[pygame.K_LEFT]:
+                self.selection_index -= 1
+            if keys[pygame.K_SPACE]:
+                self.upgrade_box_list[self.selection_index].trigger_action(self.player)
+            self.selection_index = max(
+                0,
+                min(self.selection_index, self.max_player_attrs - 1),
+            )
+
+    def selection_cooldown(self):
+        if not self.can_move:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.selection_time >= self.cooldown:
+                self.can_move = True
+
+    def create_upgrade_box(self):
+        self.upgrade_box_list = []
+        attrs_names = list(self.player.STATS.keys())
+        attrs_values = list(self.player.STATS.values())
+
+        for i in range(self.max_player_attrs):
+            top = self.display_surface.get_height() * 0.1
+            left = self.start_pos_x + i * self.upgrade_box_width + (i * 10)
+            upgrade_box = UpgradeBox(
+                (top, left),
+                (self.upgrade_box_width, self.upgrade_box_height),
+                i,
+            )
+            self.upgrade_box_list.append(upgrade_box)
 
     def display(self):
-        self.display_surface.fill((0, 0, 0))
-        for box in [self.health_box, self.energy_box, self.weapon_box, self.magic_box]:
-            box.display(self.display_surface)
+        self.get_input()
+        self.selection_cooldown()
+        for index, upgrade_box in enumerate(self.upgrade_box_list):
+            attribute_stat = self.player.get_stat_by_index(index)
+            upgrade_box.display(
+                self.display_surface, self.selection_index, attribute_stat
+            )
 
 
 class UpgradeBox:
-    LINE_WIDTH = 25
-    OFFSET = (10, 10)
-
     def __init__(
         self,
-        pos: tuple[int, int],
-        label: str,
-        action: Optional[Callable] = None,
+        topleft: tuple[int, int],
+        size: tuple[int, int],
+        index: int,
     ):
-        self.font = self.load_font()
-        self.position = pos
-        self.surface = self.create_surface(UPGRADE_BOX_SIZE)
-        self.rect = self.surface.get_rect(topleft=pos)
-        self.label = self.render_label(label)
-        self.label_position = self.calculate_label_position()
-        self.upgrade_line_size = self.calculate_upgrade_line_size()
-        self.upgrade_line_pos = self.calculate_upgrade_line_position()
-        self.upgrade_line_rect = pygame.Rect(
+        self.image = pygame.Surface(size, pygame.SRCALPHA)
+        self.image.fill((96, 125, 139, 200))
+        self.position = topleft[1], topleft[0]
+        self.rect = self.image.get_rect(topleft=(self.position))
+        self.radius_pos = topleft[1] - 5, topleft[0] - 5
+        self.radius_size = size[0] + 10, size[1] + 10
+        self.index = index
+
+    @classmethod
+    def set_font(self, font: pygame.font.Font):
+        self.font = font
+
+    def trigger_action(self, player: pygame.sprite.Sprite):
+        selected_attr = list(player.STATS.keys())[self.index]
+        required_cost = player.STATS[list(player.STATS.keys())[self.index]]
+
+    def display(
+        self,
+        display_surface: pygame.Surface,
+        selection_index: int,
+        attribute_stat: dict,
+    ):
+        label = self.font.render(str(attribute_stat["attr"]), True, "yellow")
+        value = self.font.render(str(attribute_stat["value"]["amount"]), True, "yellow")
+        max_value = self.font.render(
+            str(attribute_stat["value"]["max_value"]), True, "red"
+        )
+
+        display_surface.blit(self.image, self.position)
+        self.display_bar(display_surface, attribute_stat["value"])
+
+        display_surface.blit(
+            label,
             (
-                self.rect.left + self.upgrade_line_pos[0],
-                self.rect.top + self.upgrade_line_pos[1],
+                self.position[0] + (self.image.get_width() - label.get_width()) // 2,
+                self.position[1] - label.get_height(),
             ),
-            self.upgrade_line_size,
         )
-
-        self.gear = Gear(self.rect, self.upgrade_line_rect)
-
-    def load_font(self) -> pygame.font.Font:
-        return pygame.font.Font("graphics/font/joystix.ttf", 24)
-
-    def create_surface(self, size: tuple[int, int]) -> pygame.Surface:
-        surface = pygame.Surface(size, pygame.SRCALPHA)
-        surface.fill((255, 250, 200, 50))
-        return surface
-
-    def render_label(self, label: str) -> pygame.Surface:
-        return self.font.render(label, True, "white")
-
-    def calculate_label_position(self) -> tuple[int, int]:
-        return (UPGRADE_BOX_SIZE[0] - self.label.get_width()) // 2, 0
-
-    def calculate_upgrade_line_size(self) -> tuple[int, int]:
-        return (
-            self.LINE_WIDTH,
-            self.surface.get_height() - self.label.get_height() - self.OFFSET[1] * 2,
+        display_surface.blit(
+            value,
+            (
+                self.position[0] + (self.image.get_width() - value.get_width()) // 2,
+                self.rect.bottom - value.get_height(),
+            ),
         )
-
-    def calculate_upgrade_line_position(self) -> tuple[int, int]:
-        return (
-            self.surface.get_width() // 2 - self.upgrade_line_size[0] // 2,
-            self.label.get_height() + self.OFFSET[1],
+        display_surface.blit(
+            max_value, ((self.rect.centerx - max_value.get_width() // 2), self.rect.top)
         )
+        if self.index == selection_index:
+            pygame.draw.rect(
+                display_surface,
+                (0, 255, 208),
+                (self.radius_pos, self.radius_size),
+                5,
+                5,
+            )
+            self.image.fill((96, 125, 139))
+        else:
+            self.image.fill((96, 125, 139, 200))
 
-    def display(self, surface: pygame.Surface):
-        self.surface.blit(self.label, self.label_position)
-        surface.blit(self.surface, self.position)
-        pygame.draw.rect(
-            self.surface, "white", (*self.upgrade_line_pos, *self.upgrade_line_size)
-        )
-        self.gear.display(surface)
-
-
-class Gear:
-    def __init__(self, parent_rect: pygame.Rect, upgrade_line_rect: pygame.Rect):
-        parent_rect = parent_rect
-        self.upgrade_line_rect = upgrade_line_rect
-        self.image = pygame.Surface(GEAR_SIZE, pygame.SRCALPHA)
-        self.rect = self.image.get_rect(midbottom=parent_rect.midbottom)
-
-    def display(self, display_surface: pygame.Surface):
-        self.update()
-        pygame.draw.rect(display_surface, "brown", self.rect, 0, 5)
-
-    def update(self):
-        mouse_pos, is_pressed = pygame.mouse.get_pos(), pygame.mouse.get_pressed()[0]
-        if self.upgrade_line_rect.collidepoint(mouse_pos) and is_pressed:
-            self.rect.center = (self.rect.centerx, mouse_pos[1])
+    def display_bar(self, display_surface: pygame.Surface, attribute_stat: dict):
+        midtop = self.rect.centerx, self.rect.top + 60
+        midbottom = self.rect.centerx, self.rect.bottom - 60
+        full_height = midbottom[1] - midtop[1]
+        relative_value = (
+            attribute_stat["amount"] / attribute_stat["max_value"]
+        ) * full_height
+        value_rect = (midtop[0] - 15, midbottom[1] - relative_value, 30, 30)
+        pygame.draw.rect(display_surface, "white", value_rect)
+        pygame.draw.line(display_surface, "white", midtop, midbottom, 4)

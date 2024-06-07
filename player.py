@@ -1,4 +1,5 @@
 from typing import Union
+from collections import OrderedDict
 from settings import *
 import pygame
 from pygame.image import load
@@ -10,13 +11,24 @@ from frameloader import load_frames
 
 
 class Player(Character):
-    STATS = {
-        "health": HEALTH_BAR_WIDTH,
-        "energy": ENERGY_BAR_WIDTH,
-        "attack": SPEED,
-        "speed": SPEED,
-        "exp": EXP,
-    }
+    STATS = OrderedDict(
+        {
+            "health": {"amount": HEALTH_BAR_WIDTH, "cost": 100, "max_value": 300},
+            "energy": {"amount": ENERGY_BAR_WIDTH, "cost": 100, "max_value": 300},
+            "flame": {
+                "amount": magic_data["flame"]["strength"],
+                "cost": 200,
+                "max_value": 50,
+            },
+            "heal": {
+                "amount": magic_data["heal"]["strength"],
+                "cost": 150,
+                "max_value": 50,
+            },
+            "attack": {"amount": 20, "cost": 150, "max_value": 40},
+            "speed": {"amount": SPEED, "cost": 150, "max_value": 8},
+        }
+    )
 
     def __init__(
         self,
@@ -37,10 +49,10 @@ class Player(Character):
         self.hitbox = self.rect.inflate(0, -20)
 
         # Initializing player attributes
-        self.speed = Player.STATS["speed"]
-        self.health = Player.STATS["health"] * 0.5
-        self.energy = Player.STATS["energy"]
-        self.exp = Player.STATS["exp"]
+        self.speed = Player.STATS["speed"]["amount"]
+        self.health = Player.STATS["health"]["amount"]
+        self.energy = Player.STATS["energy"]["amount"]
+        self.exp = EXP
         self.obstacle_sprites = obstacle
 
         self.invincible_duration = 1000
@@ -71,16 +83,20 @@ class Player(Character):
     def update_health(self, amount: int):
         self.health += amount
 
-        if self.health > HEALTH_BAR_WIDTH:
-            self.health = HEALTH_BAR_WIDTH
+        if self.health > self.STATS["health"]:
+            self.health = self.STATS["health"]
         elif self.health < 0:
             self.health = 0
 
+    def get_stat_by_index(self, index: int):
+        key = list(self.STATS.keys())[index]
+        return {"attr": key, "value": self.STATS[key]}
+
     def get_current_health(self):
-        return (self.health / self.STATS["health"]) * 100
+        return (self.health / self.STATS["health"]["amount"]) * 100
 
     def get_current_energy(self):
-        return (self.energy / self.STATS["energy"]) * 100
+        return (self.energy / self.STATS["energy"]["amount"]) * 100
 
     def update_exp(self, exp: int):
         self.exp += exp

@@ -4,11 +4,15 @@ from frameloader import load_frames
 from player import Player
 
 
-class Flame(pygame.sprite.Sprite):
-    MAX_TRAVEL_DISTANCE = 400
-
+class Magic(pygame.sprite.Sprite):
     def __init__(self, entity: dict, player: Player, groups: list[pygame.sprite.Group]):
         super().__init__(groups)
+
+
+class Flame(Magic):
+
+    def __init__(self, entity: dict, player: Player, groups: list[pygame.sprite.Group]):
+        super().__init__(entity, player, groups)
 
         self.type = entity["type"]
         direction = player.animation_handler.status.split("_")[0]
@@ -19,7 +23,7 @@ class Flame(pygame.sprite.Sprite):
             "down": (0, 1),
         }
 
-        self.strength = entity["strength"]
+        self.strength = player.STATS["flame"]
         self.speed = 8
         self.direction = Vector2(action_map[direction])
         self.frame_index = 0
@@ -46,14 +50,14 @@ class Flame(pygame.sprite.Sprite):
         self.rect.y += int(self.direction.y) * self.speed
 
 
-class Heal(pygame.sprite.Sprite):
+class Heal(Magic):
     def __init__(self, entity: dict, player: Player, groups: list[pygame.sprite.Group]):
-        super().__init__(groups)
+        super().__init__(entity, player, groups)
 
         player.update_health(entity["strength"])
 
         self.type = entity["type"]
-        self.strength = entity["strength"]
+        self.strength = player.STATS["heal"]["amount"]
 
         self.follow_rect = player.rect
 

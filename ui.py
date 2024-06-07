@@ -20,13 +20,10 @@ class UI:
         self.offset_x = 10
         self.offset_y = 10
 
-        self.get_current_magic = player.magic_handler.get_current_magic
-
-        self.get_player_health = player.get_current_health
-        self.get_player_energy = player.get_current_energy
-        self.get_player_exp = player.get_current_exp
+        self.player = player
 
         self.weapon_image = player.weapon_handler.weapon.copy()
+        self.get_current_magic = self.player.magic_handler.get_current_magic
         self.weapon_pos = (
             ITEM_BOX_SIZE // 2 - self.weapon_image.get_width() // 2,
             ITEM_BOX_SIZE // 2 - self.weapon_image.get_height() // 2,
@@ -39,15 +36,6 @@ class UI:
 
         self.font = pygame.font.Font("graphics/font/joystix.ttf", FONT_SIZE)
 
-        self.health_bar_rect = pygame.Rect(
-            self.offset_x, self.offset_y, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT
-        )
-        self.energy_bar_rect = pygame.Rect(
-            self.offset_x, self.offset_y * 3, ENERGY_BAR_WIDTH, ENERGY_BAR_HEIGHT
-        )
-
-        self.lower_health_layer_rect = self.health_bar_rect.copy()
-        self.lower_energy_layer_rect = self.energy_bar_rect.copy()
         self.exp_label_pos = Vector2(
             self.display_surface.get_width(), self.display_surface.get_height()
         )
@@ -66,23 +54,40 @@ class UI:
 
     def display(self):
         self.item_box_surf.fill((50, 91, 103, 100))
-        pygame.draw.rect(
-            self.display_surface, LOWER_LAYER_COLOR, self.lower_health_layer_rect, 0, 3
-        )
-        pygame.draw.rect(
-            self.display_surface, LOWER_LAYER_COLOR, self.lower_energy_layer_rect, 0, 3
-        )
+
         exp_label = self.font.render(
-            f" {self.get_player_exp()} ", True, "white", "black"
+            f" {self.player.get_current_exp()} ", True, "white", "black"
         )
         self.display_surface.blit(
             exp_label,
             self.exp_label_pos - (exp_label.get_width(), exp_label.get_height()),
         )
-        pygame.draw.rect(self.display_surface, HEALTH_COLOR, self.health_bar_rect, 0, 3)
-        pygame.draw.rect(self.display_surface, ENERGY_COLOR, self.energy_bar_rect, 0, 3)
-        self.health_bar_rect.width = self.get_player_health()
-        self.energy_bar_rect.width = self.get_player_energy()
+
+        pygame.draw.rect(
+            self.display_surface,
+            "brown",
+            (
+                self.offset_x,
+                self.offset_y,
+                self.player.STATS["health"]["amount"],
+                HEALTH_BAR_HEIGHT,
+            ),
+            0,
+            5,
+        )
+
+        pygame.draw.rect(
+            self.display_surface,
+            "red",
+            (
+                self.offset_x,
+                self.offset_y,
+                self.player.get_current_health(),
+                HEALTH_BAR_HEIGHT,
+            ),
+            0,
+            5,
+        )
         self.display_surface.blit(self.item_box_surf, self.item_box_pos)
         self.weapon_overlay()
         self.magic_overlay()

@@ -1,4 +1,4 @@
-WIDTH = 1000
+WIDTH = 1100
 HEIGHT = 720
 TILESIZE = 64
 FPS = 60
@@ -21,7 +21,7 @@ GEAR_SIZE = (50, 25)
 magic_data = {
     "flame": {
         "type": "flame",
-        "strength": 30,
+        "strength": 20,
         "burn_strength": 5,
         "cost": 20,
         "image": "graphics/particles/flame/fire.png",

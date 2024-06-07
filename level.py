@@ -2,12 +2,14 @@ from settings import TILESIZE, magic_data
 import pygame
 from pygame import Surface
 from pygame.sprite import Group, GroupSingle, Sprite
+from spotlight import Spotlight
 from tile import Tile, Grass
 from player import Player
 from weapon import Weapon
 from magic import Flame, Heal
 from enemy import Enemy
 from particle import Particle, grass_destruction_particle
+from upgrade import Upgrade
 from ui import UI
 from tiledmaploader import TiledMapLoader
 
@@ -34,7 +36,11 @@ class Level:
         self.current_weapon = None
         self.current_magic = None
 
+        self.paused = False
+
+        self.upgrade = Upgrade(self.player)
         self.ui = UI(self.player)
+        self.spotlight_effect = Spotlight(self.display_surface)
 
     def get_player(self):
         return self.player
@@ -105,13 +111,18 @@ class Level:
         self.current_weapon = None
 
     def run(self):
-        self.visible_sprites.update()
         self.visible_sprites.draw(relative_sprite=self.player)
-        self.particles_list.update()
-        self.particles_list.update_position(self.player.rect)
-        self.particles_list.draw(self.display_surface)
-        self.handle_enemy_getting_attacked()
-        self.handle_particle_effect_collision()
+        self.spotlight_effect.update()
+        self.ui.display()
+        if not self.paused:
+            self.visible_sprites.update()
+            self.particles_list.update()
+            self.particles_list.update_position(self.player.rect)
+            self.particles_list.draw(self.display_surface)
+            self.handle_enemy_getting_attacked()
+            self.handle_particle_effect_collision()
+        else:
+            self.upgrade.display()
 
     def setup_level(self):
         self.player = Player(
@@ -197,6 +208,9 @@ class Level:
                         match particle._type:
                             case "flame":
                                 enemy.get_damage(magic_data["flame"]["burn_strength"])
+
+    def toggle_upgrade_menu(self):
+        self.paused = not self.paused
 
 
 class YSortCameraGroup(Group):
