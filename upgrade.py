@@ -147,9 +147,11 @@ class UpgradeBox:
         midtop = self.rect.centerx, self.rect.top + 60
         midbottom = self.rect.centerx, self.rect.bottom - 60
         full_height = midbottom[1] - midtop[1]
-        relative_value = (
+        relative_height = (
             attribute_stat["amount"] / attribute_stat["max_value"]
         ) * full_height
-        value_rect = (midtop[0] - 15, midbottom[1] - relative_value, 30, 30)
+
+        # just hardcoded since code is already long
+        value_rect = (midtop[0] - 15, midbottom[1] - relative_height - 5, 30, 10)
         pygame.draw.rect(display_surface, "white", value_rect)
         pygame.draw.line(display_surface, "white", midtop, midbottom, 4)
