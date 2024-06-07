@@ -22,7 +22,7 @@ class Particle(pygame.sprite.Sprite):
 
         self.frames = load_frames(join(base_path, particle_type), flip_x)
 
-        self.image = self.frames[0]
+        self.image = self.frames[2]
         self.rect = self.image.get_rect(center=pos)
 
         self.frame_index = 0

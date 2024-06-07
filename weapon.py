@@ -7,7 +7,7 @@ class Weapon(pygame.sprite.Sprite):
     def __init__(self, player: pygame.sprite.Sprite, groups: pygame.sprite.Group):
         super().__init__(groups)
 
-        self.damage = player.STATS["attack"]
+        self.damage = player.STATS["attack"]["amount"]
 
         path = "graphics/weapons/sword/"
         direction = player.animation_handler.status.split("_")[0]

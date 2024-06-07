@@ -88,6 +88,31 @@ class UI:
             0,
             5,
         )
+        pygame.draw.rect(
+            self.display_surface,
+            "brown",
+            (
+                self.offset_x,
+                self.offset_y + HEALTH_BAR_HEIGHT + self.offset_y,
+                self.player.STATS["energy"]["amount"],
+                ENERGY_BAR_HEIGHT,
+            ),
+            0,
+            5,
+        )
+
+        pygame.draw.rect(
+            self.display_surface,
+            "skyblue",
+            (
+                self.offset_x,
+                self.offset_y + ENERGY_BAR_HEIGHT + self.offset_y,
+                self.player.get_current_energy(),
+                ENERGY_BAR_HEIGHT,
+            ),
+            0,
+            5,
+        )
         self.display_surface.blit(self.item_box_surf, self.item_box_pos)
         self.weapon_overlay()
         self.magic_overlay()

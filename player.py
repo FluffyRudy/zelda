@@ -13,20 +13,32 @@ from frameloader import load_frames
 class Player(Character):
     STATS = OrderedDict(
         {
-            "health": {"amount": HEALTH_BAR_WIDTH, "cost": 100, "max_value": 300},
-            "energy": {"amount": ENERGY_BAR_WIDTH, "cost": 100, "max_value": 300},
+            "health": {
+                "amount": HEALTH_BAR_WIDTH,
+                "cost": 100,
+                "max_value": 300,
+                "increment": 50,
+            },
+            "energy": {
+                "amount": ENERGY_BAR_WIDTH,
+                "cost": 100,
+                "max_value": 300,
+                "increment": 50,
+            },
             "flame": {
                 "amount": magic_data["flame"]["strength"],
                 "cost": 200,
                 "max_value": 50,
+                "increment": 10,
             },
             "heal": {
                 "amount": magic_data["heal"]["strength"],
-                "cost": 150,
+                "cost": 200,
                 "max_value": 50,
+                "increment": 10,
             },
-            "attack": {"amount": 20, "cost": 150, "max_value": 40},
-            "speed": {"amount": SPEED, "cost": 150, "max_value": 8},
+            "attack": {"amount": 20, "cost": 150, "max_value": 40, "increment": 10},
+            "speed": {"amount": SPEED, "cost": 150, "max_value": 8, "increment": 2},
         }
     )
 
@@ -75,28 +87,50 @@ class Player(Character):
 
     def update_energy(self, amount: int):
         self.energy += amount
-        if self.energy > ENERGY_BAR_WIDTH:
-            self.energy = ENERGY_BAR_WIDTH
+        if self.energy > self.STATS["energy"]["amount"]:
+            self.energy = self.STATS["energy"]["amount"]
         elif self.energy < 0:
             self.energy = 0
 
     def update_health(self, amount: int):
         self.health += amount
 
-        if self.health > self.STATS["health"]:
-            self.health = self.STATS["health"]
+        if self.health > self.STATS["health"]["amount"]:
+            self.health = self.STATS["health"]["amount"]
         elif self.health < 0:
             self.health = 0
+
+    def update_attribute(self, stat_name: str, update_value: int):
+        if stat_name in self.STATS:
+            stat = self.STATS[stat_name]
+            new_amount = stat["amount"] + update_value
+            if new_amount > stat["max_value"]:
+                new_amount = stat["max_value"]
+
+            stat["amount"] = new_amount
+
+            if stat_name == "speed":
+                self.speed = new_amount
+
+            if stat_name == "health":
+                self.update_health(new_amount - self.health)
+            elif stat_name == "energy":
+                self.update_energy(new_amount - self.energy)
+            stat["cost"] += stat["cost"]
 
     def get_stat_by_index(self, index: int):
         key = list(self.STATS.keys())[index]
         return {"attr": key, "value": self.STATS[key]}
 
     def get_current_health(self):
-        return (self.health / self.STATS["health"]["amount"]) * 100
+        return (self.health / self.STATS["health"]["amount"]) * self.STATS["health"][
+            "amount"
+        ]
 
     def get_current_energy(self):
-        return (self.energy / self.STATS["energy"]["amount"]) * 100
+        return (self.energy / self.STATS["energy"]["amount"]) * self.STATS["energy"][
+            "amount"
+        ]
 
     def update_exp(self, exp: int):
         self.exp += exp
@@ -185,7 +219,13 @@ class WeaponHandler:
 
 
 class MagicHandler:
-    def __init__(self, magic_creator, magic_destroyer, magic_obstacle_handler, player):
+    def __init__(
+        self,
+        magic_creator,
+        magic_destroyer,
+        magic_obstacle_handler,
+        player,
+    ):
         self.player = player
         self.magic_attacking = False
         self.magic_attack_time = 0
@@ -199,6 +239,7 @@ class MagicHandler:
         self.magic_image = pygame.image.load(magic_data[self.magic]["image"])
         self.can_switch_magic = True
         self.change_to_idle = False
+        self.immidate_kill = False
 
     def attack(self, magic_entity):
         magic_cost = magic_data[self.magic]["cost"]

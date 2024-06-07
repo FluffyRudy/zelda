@@ -6,12 +6,13 @@ from spotlight import Spotlight
 from tile import Tile, Grass
 from player import Player
 from weapon import Weapon
-from magic import Flame, Heal
+from magic import StaticFlame, Flame, Heal
 from enemy import Enemy
 from particle import Particle, grass_destruction_particle
 from upgrade import Upgrade
 from ui import UI
 from tiledmaploader import TiledMapLoader
+from typing import Union
 
 
 class Level:
@@ -66,29 +67,24 @@ class Level:
 
     def destroy_magic_attack(self):
         if self.current_magic is not None:
-            centerx, centery = self.current_magic.rect.center
-            match self.current_magic.type:
-                case "flame":
-                    direction = self.player.get_current_status().split("_")[0]
-                    x_dir, y_dir = (
-                        (1, 0)
-                        if direction not in ("up", "down")
-                        else (0, -1) if direction == "up" else (0, 1)
+            if self.current_magic.type == "flame":
+                centerx, centery = self.current_magic.rect.center
+                direction = self.player.get_current_status().split("_")[0]
+                x_dir, y_dir = (
+                    (1, 0)
+                    if direction not in ("up", "down")
+                    else (0, -1) if direction == "up" else (0, 1)
+                )
+                for i in range(-3, 3):
+                    pos_x = centerx + i * self.current_magic.image.get_width() * x_dir
+                    pos_y = centery + i * self.current_magic.image.get_height() * y_dir
+                    Particle(
+                        (pos_x, pos_y),
+                        "flame/frames",
+                        [self.visible_sprites, self.particles_list],
+                        is_dynamic=False,
+                        kill_time=1500,
                     )
-                    for i in range(-3, 3):
-                        pos_x = (
-                            centerx + i * self.current_magic.image.get_width() * x_dir
-                        )
-                        pos_y = (
-                            centery + i * self.current_magic.image.get_height() * y_dir
-                        )
-                        Particle(
-                            (pos_x, pos_y),
-                            "flame/frames",
-                            [self.visible_sprites, self.particles_list],
-                            is_dynamic=False,
-                            kill_time=1500,
-                        )
             self.current_magic.kill()
         self.current_magic = None
 

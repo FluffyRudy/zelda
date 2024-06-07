@@ -10,7 +10,7 @@ class Upgrade:
 
         self.selection_index = 0
         self.selection_time = None
-        self.cooldown = 300
+        self.cooldown = 100
         self.can_move = True
 
         font = pygame.font.Font("graphics/font/joystix.ttf", 25)
@@ -95,9 +95,13 @@ class UpgradeBox:
     def set_font(self, font: pygame.font.Font):
         self.font = font
 
-    def trigger_action(self, player: pygame.sprite.Sprite):
-        selected_attr = list(player.STATS.keys())[self.index]
-        required_cost = player.STATS[list(player.STATS.keys())[self.index]]
+    def trigger_action(self, player):
+        selected_attr = player.get_stat_by_index(self.index)
+        attr = selected_attr["attr"]
+        if player.exp < selected_attr["value"]["cost"]:
+            return
+        if selected_attr["value"]["amount"] < selected_attr["value"]["max_value"]:
+            player.update_attribute(attr, selected_attr["value"]["increment"])
 
     def display(
         self,
@@ -105,43 +109,18 @@ class UpgradeBox:
         selection_index: int,
         attribute_stat: dict,
     ):
-        label = self.font.render(str(attribute_stat["attr"]), True, "yellow")
-        value = self.font.render(str(attribute_stat["value"]["amount"]), True, "yellow")
-        max_value = self.font.render(
-            str(attribute_stat["value"]["max_value"]), True, "red"
-        )
-
-        display_surface.blit(self.image, self.position)
-        self.display_bar(display_surface, attribute_stat["value"])
-
-        display_surface.blit(
-            label,
-            (
-                self.position[0] + (self.image.get_width() - label.get_width()) // 2,
-                self.position[1] - label.get_height(),
-            ),
-        )
-        display_surface.blit(
-            value,
-            (
-                self.position[0] + (self.image.get_width() - value.get_width()) // 2,
-                self.rect.bottom - value.get_height(),
-            ),
-        )
-        display_surface.blit(
-            max_value, ((self.rect.centerx - max_value.get_width() // 2), self.rect.top)
-        )
+        self.display_names(display_surface, attribute_stat)
         if self.index == selection_index:
             pygame.draw.rect(
-                display_surface,
-                (0, 255, 208),
-                (self.radius_pos, self.radius_size),
-                5,
-                5,
+                surface=display_surface,
+                color=(0, 255, 208),
+                rect=(self.radius_pos, self.radius_size),
+                width=5,
+                border_radius=5,
             )
-            self.image.fill((96, 125, 139))
+            self.image.fill(color=(96, 125, 139))
         else:
-            self.image.fill((96, 125, 139, 200))
+            self.image.fill(color=(96, 125, 139, 200))
 
     def display_bar(self, display_surface: pygame.Surface, attribute_stat: dict):
         midtop = self.rect.centerx, self.rect.top + 60
@@ -155,3 +134,32 @@ class UpgradeBox:
         value_rect = (midtop[0] - 15, midbottom[1] - relative_height - 5, 30, 10)
         pygame.draw.rect(display_surface, "white", value_rect)
         pygame.draw.line(display_surface, "white", midtop, midbottom, 4)
+
+    def display_names(self, display_surface: pygame.Surface, attribute_stat: dict):
+        label = self.font.render(str(attribute_stat["attr"]), True, "yellow")
+        value = self.font.render(str(attribute_stat["value"]["cost"]), True, "yellow")
+        max_value = self.font.render(
+            str(attribute_stat["value"]["max_value"]), True, "red"
+        )
+
+        display_surface.blit(self.image, self.position)
+        self.display_bar(display_surface, attribute_stat["value"])
+
+        display_surface.blit(
+            source=label,
+            dest=(
+                self.position[0] + (self.image.get_width() - label.get_width()) // 2,
+                self.position[1] - label.get_height(),
+            ),
+        )
+        display_surface.blit(
+            source=value,
+            dest=(
+                self.position[0] + (self.image.get_width() - value.get_width()) // 2,
+                self.rect.bottom - value.get_height(),
+            ),
+        )
+        display_surface.blit(
+            source=max_value,
+            dest=((self.rect.centerx - max_value.get_width() // 2), self.rect.top),
+        )

@@ -9,12 +9,15 @@ class Magic(pygame.sprite.Sprite):
         super().__init__(groups)
 
 
-class Flame(Magic):
-
+class StaticFlame(Magic):
     def __init__(self, entity: dict, player: Player, groups: list[pygame.sprite.Group]):
         super().__init__(entity, player, groups)
 
         self.type = entity["type"]
+        self.strength = player.STATS["flame"]["amount"]
+        self.image = pygame.image.load(entity["image"]).convert_alpha()
+        self.frames = load_frames(entity["frames"])
+
         direction = player.animation_handler.status.split("_")[0]
         action_map = {
             "left": (-1, 0.5),
@@ -23,19 +26,31 @@ class Flame(Magic):
             "down": (0, 1),
         }
 
-        self.strength = player.STATS["flame"]
-        self.speed = 8
-        self.direction = Vector2(action_map[direction])
-        self.frame_index = 0
-        self.animation_speed = 0.1
-        self.image = pygame.image.load(entity["image"]).convert_alpha()
-        self.frames = load_frames(entity["frames"])
-
         dirx, diry = action_map[direction]
         pos_x = player.rect.centerx + dirx * self.image.get_width() // 2
         pos_y = player.rect.centery + diry * self.image.get_height() // 2
         self.rect = self.image.get_rect(center=(pos_x, pos_y))
-        self.traveled_distance = 0
+
+    def update(self):
+        self.kill()
+
+
+class Flame(StaticFlame):
+    def __init__(self, entity: dict, player: Player, groups: list[pygame.sprite.Group]):
+        super().__init__(entity, player, groups)
+
+        direction = player.animation_handler.status.split("_")[0]
+        action_map = {
+            "left": (-1, 0.5),
+            "right": (1, 0.5),
+            "up": (0, -1),
+            "down": (0, 1),
+        }
+
+        self.speed = 8
+        self.direction = Vector2(action_map[direction])
+        self.frame_index = 0
+        self.animation_speed = 0.1
 
     def animate(self):
         self.frame_index += self.animation_speed
