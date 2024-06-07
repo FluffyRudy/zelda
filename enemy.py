@@ -1,12 +1,12 @@
 import pygame
-from settings import monster_data
+from settings import monster_data, PROJECT_DIR
 from character import Character
 from particle import Particle
 from frameloader import load_frames
 from os.path import join
 from math import hypot, sin
 from typing import Callable
-
+import os
 
 class Enemy(Character):
     def __init__(
@@ -109,7 +109,7 @@ class AnimationHandler:
         self.frame_index = 0
         self.animation_speed = 0.08
 
-        base_path = "graphics/monsters"
+        base_path = os.path.join(PROJECT_DIR,  "graphics/monsters")
         monster_path = join(base_path, self.enemy.monster_type)
 
         self.animations = {

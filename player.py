@@ -55,7 +55,8 @@ class Player(Character):
     ):
         super().__init__(group)
         self.image: Surface = pygame.transform.scale(
-            load("graphics/test/player.png").convert_alpha(), (TILESIZE, TILESIZE)
+            load(os.path.join(PROJECT_DIR, "graphics/test/player.png")).convert_alpha(),
+            (TILESIZE, TILESIZE),
         )
         self.rect: Rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0, -20)
@@ -201,7 +202,9 @@ class WeaponHandler:
         self.attack_delay = ATTACK_DELAY
         self.create_attack = weapon_creator
         self.hide_weapon = weapon_hider
-        self.weapon = pygame.image.load("graphics/weapons/sword/up.png")
+        self.weapon = pygame.image.load(
+            os.path.join(PROJECT_DIR, "graphics/weapons/sword/up.png")
+        )
 
     def attack(self):
         self.attack_time = pygame.time.get_ticks()
@@ -278,18 +281,34 @@ class AnimationHandler:
         self.frame_index = 0
         self.animation_speed = 0.2
         self.animations = {
-            "right_idle": load_frames("graphics/player/right_idle/"),
-            "left_idle": load_frames("graphics/player/left_idle/"),
-            "up_idle": load_frames("graphics/player/up_idle/"),
-            "down_idle": load_frames("graphics/player/down_idle/"),
-            "right_attack": load_frames("graphics/player/right_attack/"),
-            "left_attack": load_frames("graphics/player/left_attack/"),
-            "up_attack": load_frames("graphics/player/up_attack/"),
-            "down_attack": load_frames("graphics/player/down_attack/"),
-            "down": load_frames("graphics/player/down/"),
-            "up": load_frames("graphics/player/up/"),
-            "left": load_frames("graphics/player/left/"),
-            "right": load_frames("graphics/player/right/"),
+            "right_idle": load_frames(
+                os.path.join(PROJECT_DIR, "graphics/player/right_idle/")
+            ),
+            "left_idle": load_frames(
+                os.path.join(PROJECT_DIR, "graphics/player/left_idle/")
+            ),
+            "up_idle": load_frames(
+                os.path.join(PROJECT_DIR, "graphics/player/up_idle/")
+            ),
+            "down_idle": load_frames(
+                os.path.join(PROJECT_DIR, "graphics/player/down_idle/")
+            ),
+            "right_attack": load_frames(
+                os.path.join(PROJECT_DIR, "graphics/player/right_attack/")
+            ),
+            "left_attack": load_frames(
+                os.path.join(PROJECT_DIR, "graphics/player/left_attack/")
+            ),
+            "up_attack": load_frames(
+                os.path.join(PROJECT_DIR, "graphics/player/up_attack/")
+            ),
+            "down_attack": load_frames(
+                os.path.join(PROJECT_DIR, "graphics/player/down_attack/")
+            ),
+            "down": load_frames(os.path.join(PROJECT_DIR, "graphics/player/down/")),
+            "up": load_frames(os.path.join(PROJECT_DIR, "graphics/player/up/")),
+            "left": load_frames(os.path.join(PROJECT_DIR, "graphics/player/left/")),
+            "right": load_frames(os.path.join(PROJECT_DIR, "graphics/player/right/")),
         }
 
     def update_status(self):

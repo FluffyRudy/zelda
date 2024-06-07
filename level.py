@@ -1,4 +1,4 @@
-from settings import TILESIZE, magic_data
+from settings import TILESIZE, magic_data, PROJECT_DIR
 import pygame
 from pygame import Surface
 from pygame.sprite import Group, GroupSingle, Sprite
@@ -13,13 +13,13 @@ from upgrade import Upgrade
 from ui import UI
 from tiledmaploader import TiledMapLoader
 from typing import Union
+import os
 
 
 class Level:
     def __init__(self):
         self.display_surface: Surface = pygame.display.get_surface()
-
-        self.map_data = TiledMapLoader("maps/tmx/map.tmx")
+        self.map_data = TiledMapLoader(os.path.join(PROJECT_DIR, "maps/tmx/map.tmx"))
 
         self.visible_sprites: YSortCameraGroup = YSortCameraGroup(self.map_data)
         self.obstacle_sprites: Group = Group()

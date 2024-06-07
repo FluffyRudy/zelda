@@ -1,4 +1,6 @@
 import pygame
+import os
+from settings import PROJECT_DIR
 
 
 class Upgrade:
@@ -6,14 +8,18 @@ class Upgrade:
         self.display_surface = pygame.display.get_surface()
         self.player = player
         self.max_player_attrs = len(player.STATS)
-        self.font = pygame.font.Font("graphics/font/joystix.ttf", 24)
+        self.font = pygame.font.Font(
+            os.path.join(PROJECT_DIR, "graphics/font/joystix.ttf"), 24
+        )
 
         self.selection_index = 0
         self.selection_time = None
         self.cooldown = 100
         self.can_move = True
 
-        font = pygame.font.Font("graphics/font/joystix.ttf", 25)
+        font = pygame.font.Font(
+            os.path.join(PROJECT_DIR, "graphics/font/joystix.ttf"), 25
+        )
         UpgradeBox.set_font(font=font)
         self.upgrade_box_height = self.display_surface.get_height() * 0.8
         self.upgrade_box_width = (

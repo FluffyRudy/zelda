@@ -8,9 +8,11 @@ from settings import (
     HEALTH_COLOR,
     ENERGY_COLOR,
     LOWER_LAYER_COLOR,
+    PROJECT_DIR,
 )
 from pygame.math import Vector2
 import pygame
+import os
 
 
 class UI:
@@ -34,7 +36,9 @@ class UI:
             ITEM_BOX_SIZE // 2 - self.get_current_magic().get_height() // 2,
         )
 
-        self.font = pygame.font.Font("graphics/font/joystix.ttf", FONT_SIZE)
+        self.font = pygame.font.Font(
+            os.path.join(PROJECT_DIR, "graphics/font/joystix.ttf"), 24
+        )
 
         self.exp_label_pos = Vector2(
             self.display_surface.get_width(), self.display_surface.get_height()

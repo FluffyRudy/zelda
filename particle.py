@@ -4,6 +4,7 @@ from os import listdir
 from random import shuffle
 from frameloader import load_frames
 from typing import Iterable, Optional
+from settings import PROJECT_DIR
 
 
 class Particle(pygame.sprite.Sprite):
@@ -18,7 +19,7 @@ class Particle(pygame.sprite.Sprite):
     ):
         super().__init__(groups)
 
-        base_path = "graphics/particles/"
+        base_path = join(PROJECT_DIR, "graphics/particles/")
 
         self.frames = load_frames(join(base_path, particle_type), flip_x)
 
