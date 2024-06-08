@@ -17,7 +17,7 @@ class Player(Character):
                 "amount": HEALTH_BAR_WIDTH,
                 "cost": 100,
                 "max_value": 300,
-                "increment": 50,
+                "increment": 150,
             },
             "energy": {
                 "amount": ENERGY_BAR_WIDTH,
@@ -38,7 +38,7 @@ class Player(Character):
                 "increment": 10,
             },
             "attack": {"amount": 20, "cost": 150, "max_value": 40, "increment": 10},
-            "speed": {"amount": SPEED, "cost": 150, "max_value": 8, "increment": 2},
+            "speed": {"amount": SPEED, "cost": 200, "max_value": 8, "increment": 1},
         }
     )
 
@@ -119,7 +119,7 @@ class Player(Character):
                 self.update_health(new_amount - self.health)
             elif stat_name == "energy":
                 self.update_energy(new_amount - self.energy)
-            stat["cost"] += stat["cost"]
+            stat["cost"] += stat["cost"] * 2
 
     def get_stat_by_index(self, index: int):
         key = list(self.STATS.keys())[index]

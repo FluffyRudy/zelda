@@ -69,7 +69,7 @@ class Heal(Magic):
     def __init__(self, entity: dict, player: Player, groups: list[pygame.sprite.Group]):
         super().__init__(entity, player, groups)
 
-        player.update_health(entity["strength"])
+        player.update_health(player.STATS["heal"]["amount"])
 
         self.type = entity["type"]
         self.strength = player.STATS["heal"]["amount"]
