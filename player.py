@@ -55,7 +55,9 @@ class Player(Character):
     ):
         super().__init__(group)
         self.image: Surface = pygame.transform.scale(
-            load(os.path.join(PROJECT_DIR, "graphics/test/player.png")).convert_alpha(),
+            load(
+                os.path.join(PROJECT_DIR, "graphics/player/down_idle/idle_down.png")
+            ).convert_alpha(),
             (TILESIZE, TILESIZE),
         )
         self.rect: Rect = self.image.get_rect(topleft=pos)
