@@ -210,6 +210,7 @@ class WeaponHandler:
         self.weapon_attack_sound = pygame.mixer.Sound(
             os.path.join(PROJECT_DIR, "audio/sword.wav")
         )
+        self.weapon_attack_sound.set_volume(1)
 
     def attack(self):
         self.attack_time = pygame.time.get_ticks()

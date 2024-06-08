@@ -60,6 +60,7 @@ class Particle(pygame.sprite.Sprite):
             self.sound = pygame.mixer.Sound(
                 join(PROJECT_DIR, self.sound_map[self._type])
             )
+            self.sound.set_volume(1.0)
 
         self.set_instance(self)
 
