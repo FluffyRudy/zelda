@@ -30,6 +30,7 @@ class Game:
         pygame.display.set_caption("ZELDA")
 
     def run(self) -> None:
+        self.screen.fill((119, 221, 238))
         while True:
             self.handle_event()
             self.level.run()
