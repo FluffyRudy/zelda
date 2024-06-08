@@ -1,6 +1,7 @@
 import pygame
-from settings import ATTACK_DELAY
+from settings import ATTACK_DELAY, PROJECT_DIR
 from pygame.math import Vector2
+import os
 
 
 class Weapon(pygame.sprite.Sprite):
@@ -9,7 +10,7 @@ class Weapon(pygame.sprite.Sprite):
 
         self.damage = player.STATS["attack"]["amount"]
 
-        path = "graphics/weapons/sword/"
+        path = os.path.join(PROJECT_DIR, "graphics/weapons/sword/")
         direction = player.animation_handler.status.split("_")[0]
         action_map = {
             "left": {"image": "left.png", "pos": (-1, 0.5)},
