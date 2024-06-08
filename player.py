@@ -207,11 +207,15 @@ class WeaponHandler:
         self.weapon = pygame.image.load(
             os.path.join(PROJECT_DIR, "graphics/weapons/sword/up.png")
         )
+        self.weapon_attack_sound = pygame.mixer.Sound(
+            os.path.join(PROJECT_DIR, "audio/sword.wav")
+        )
 
     def attack(self):
         self.attack_time = pygame.time.get_ticks()
         self.attacking = True
         self.create_attack()
+        self.weapon_attack_sound.play()
 
     def get_current_weapon(self):
         return self.weapon
@@ -244,7 +248,6 @@ class MagicHandler:
         self.magic_image = pygame.image.load(magic_data[self.magic]["image"])
         self.can_switch_magic = True
         self.change_to_idle = False
-        self.immidate_kill = False
 
     def attack(self, magic_entity):
         magic_cost = magic_data[self.magic]["cost"]

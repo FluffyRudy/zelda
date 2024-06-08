@@ -47,7 +47,7 @@ class Enemy(Character):
         self.attack_time = 0
 
         self.launch_attack = handle_enemy_getting_attacked
-
+        self.sound = pygame.mixer.Sound(join(PROJECT_DIR, "audio/death.wav"))
         self.animation_handler = AnimationHandler(self, self.relative_sprite)
 
     def update(self):
@@ -97,7 +97,9 @@ class Enemy(Character):
             if self.health <= 0:
                 self.relative_sprite.update_exp(self.exp)
                 Particle(self.hitbox.center, 'smoke_orange', self.relative_sprite.groups())
+                self.sound.play()
                 self.kill()
+                
 
 
 class AnimationHandler:

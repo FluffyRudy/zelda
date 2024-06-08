@@ -2,6 +2,8 @@ import pygame
 from pygame.math import Vector2
 from frameloader import load_frames
 from player import Player
+from settings import PROJECT_DIR
+from os.path import join
 
 
 class Magic(pygame.sprite.Sprite):
@@ -51,6 +53,7 @@ class Flame(StaticFlame):
         self.direction = Vector2(action_map[direction])
         self.frame_index = 0
         self.animation_speed = 0.1
+        self.sound = pygame.mixer.Sound(join(PROJECT_DIR, "audio/attack/fireball.wav"))
 
     def animate(self):
         self.frame_index += self.animation_speed
@@ -88,6 +91,8 @@ class Heal(Magic):
         pos_y = player.rect.centery
         self.rect = self.image.get_rect(center=(pos_x, pos_y))
 
+        self.sound = pygame.mixer.Sound(join(PROJECT_DIR, "audio/heal.wav"))
+
     def animate(self):
         self.frame_index += self.animation_speed
         if self.frame_index >= len(self.frames):
@@ -96,5 +101,6 @@ class Heal(Magic):
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def update(self):
+        self.sound.play()
         self.animate()
         self.rect.center = self.player.rect.center

@@ -58,6 +58,7 @@ class Level:
                 self.current_magic = Heal(
                     magic_entity, self.player, [self.visible_sprites]
                 )
+        self.current_magic.sound.play()
         Particle(
             self.player.rect.midbottom,
             "aura",
@@ -83,7 +84,6 @@ class Level:
                         "flame/frames",
                         [self.visible_sprites, self.particles_list],
                         is_dynamic=False,
-                        kill_time=1500,
                     )
             self.current_magic.kill()
         self.current_magic = None
@@ -204,6 +204,9 @@ class Level:
                         match particle._type:
                             case "flame":
                                 enemy.get_damage(magic_data["flame"]["burn_strength"])
+                                pygame.mixer.Sound(
+                                    os.path.join(PROJECT_DIR, "audio/Fire.wav")
+                                ).play()
 
     def toggle_upgrade_menu(self):
         self.paused = not self.paused
